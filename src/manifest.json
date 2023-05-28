@@ -1,0 +1,31 @@
+{
+    "name": "Hint Extension",
+    "description": "Helps user to interact with web page",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "icons": {
+        "32": "/icons/icon32.png",
+        "48": "/icons/icon48.png",
+        "128": "/icons/icon128.png"
+    },
+    "action": {
+        "default_popup": "html/popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://ru.wikipedia.org/*"],
+            "run_at": "document_end",
+            "js": [
+                "js/shepherd.min.js",
+                "js/content-script.js"
+            ]
+        }
+    ],
+    "host_permissions": ["https://ru.wikipedia.org/*"],
+    "web_accessible_resources": [
+        {
+            "resources": ["css/shepherd.css"],
+            "matches": ["https://ru.wikipedia.org/*"]
+        }
+    ]
+}
