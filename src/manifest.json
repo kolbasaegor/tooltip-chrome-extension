@@ -1,31 +1,37 @@
 {
-    "name": "Hint Extension",
+    "name": "EasyTooltips",
     "description": "Helps user to interact with web page",
     "version": "1.0.0",
     "manifest_version": 3,
     "icons": {
         "32": "/icons/icon32.png",
-        "48": "/icons/icon48.png",
+        "64": "/icons/icon64.png",
         "128": "/icons/icon128.png"
     },
     "action": {
-        "default_popup": "html/popup.html"
+        "default_popup": "popup/popup.html"
     },
+    "permissions": [
+        "activeTab"
+    ],
     "content_scripts": [
         {
-            "matches": ["https://ru.wikipedia.org/*"],
+            "matches": ["https://en.wikipedia.org/wiki/Main_Page"],
             "run_at": "document_end",
             "js": [
-                "js/shepherd.min.js",
-                "js/content-script.js"
+                "scripts/shepherd.min.js",
+                "scripts/content-script.js"
             ]
         }
     ],
-    "host_permissions": ["https://ru.wikipedia.org/*"],
+    "background": {
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
     "web_accessible_resources": [
         {
             "resources": ["css/shepherd.css"],
-            "matches": ["https://ru.wikipedia.org/*"]
+            "matches": ["<all_urls>"]
         }
     ]
 }

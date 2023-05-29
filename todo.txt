@@ -1,0 +1,2 @@
+1. сделать так чтобы url сайта прилетал в service-worker.js
+   а он отправлял ответ в content-script.js и в popup.js

@@ -1,5 +1,3 @@
-console.log("extension is working");
-
 // include css
 const includeCss = (pathToCss) => {
   const link = document.createElement('link');
@@ -33,7 +31,7 @@ const createTour = () => {
 // add initial tooltip to the tour
 const addInitialStep = (tour, websiteName) => {
   tour.addStep({
-    title: `Welcome to <strong>${websiteName}</strong>!`,
+    title: `<strong>Welcome to ${websiteName}!</strong>`,
     text: `Tips are available on this site. 
           They will tell you about the site and teach you how 
           to use some of the site's elements. 
@@ -50,7 +48,7 @@ const addInitialStep = (tour, websiteName) => {
         action() {
           return this.next();
         },
-        text: 'Yes'
+        text: 'Sure'
       }
     ],
   });
@@ -121,26 +119,37 @@ const addSteps = (tour, data) => {
 }
 
 
-
+//---------------- main ----------------
 const data = {
-  "website": "https://ru.wikipedia.org/",
-  "websiteName": "WikiPedia",
+  "websiteName": "doodle",
   "numOfSteps": 2,
   "steps": [
     {
-        "attachTo": "#simpleSearch",
+        "attachTo": "#searchform",
         "title": "Hi",
         "text": "1",
-        "on": "right"
+        "on": "bottom"
     },
     {
-      "attachTo": "#footer-icons",
+      "attachTo": "#p-lang-btn",
       "title": "Hi",
       "text": "2",
       "on": "top"
     },
   ]
 };
+
+
+console.log("extension is working");
+
+const sendMessage = async () => {
+  const response = await chrome.runtime.sendMessage({url: ""});
+  // do something with response here, not outside the function
+  console.log(response);
+}
+// sendMessage();
+// console.log(getCurrentTab());
+
 
 includeCss("css/shepherd.css");
 
