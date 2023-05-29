@@ -186,12 +186,16 @@
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.4;
+  opacity: 0.3;
   background: rgba(0, 0, 0);
   z-index: 9998;
 }
 
 .shepherd-target {
-
+  position: relative;
   z-index: 9999;
+}
+
+.shepherd-content img{
+  width: 100%;
 }

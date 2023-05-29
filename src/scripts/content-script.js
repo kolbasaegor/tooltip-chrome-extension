@@ -102,7 +102,7 @@ const getButtonsForStep = (step, length) => {
 
 // add steps to the tour
 const addSteps = (tour, data) => {
-  addInitialStep(tour, data.websiteName);
+  addInitialStep(tour, data.name);
 
   for (let i = 0; i < data.numOfSteps; i++) {
     let step = data.steps[i];
@@ -120,19 +120,16 @@ const addSteps = (tour, data) => {
 
 
 const goTour = async (tour) => {
-  const response = await chrome.runtime.sendMessage({greeting: "hello"});
+  const response = await chrome.runtime.sendMessage({msg: "get_tt"});
   
   if (response.status) {
     console.log('tooltips in enabled on this site');
     addSteps(tour, response.data);
     tour.start();
-  } else {
-    console.log("tooltips in disabled on this site");
   }
 }
 
 //---------------- main ----------------
-console.log("extension is working");
 includeCss("css/shepherd.css");
 
 const tour = createTour();
