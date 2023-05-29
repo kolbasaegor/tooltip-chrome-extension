@@ -1,7 +1,7 @@
 {
     "name": "EasyTooltips",
     "description": "Helps user to interact with web page",
-    "version": "1.0.0",
+    "version": "0.1",
     "manifest_version": 3,
     "icons": {
         "32": "/icons/icon32.png",
@@ -12,11 +12,12 @@
         "default_popup": "popup/popup.html"
     },
     "permissions": [
-        "activeTab"
+        "scripting",
+        "tabs"
     ],
     "content_scripts": [
         {
-            "matches": ["https://en.wikipedia.org/wiki/Main_Page"],
+            "matches": ["<all_urls>"],
             "run_at": "document_end",
             "js": [
                 "scripts/shepherd.min.js",

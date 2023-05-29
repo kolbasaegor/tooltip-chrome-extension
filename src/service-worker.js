@@ -2,17 +2,33 @@ const availableUrls = [
     "https://en.wikipedia.org/wiki/Main_Page"
 ]
 
-const checkUrl = (url) => {
-    return url in availableUrls ? true : false;
+const tooltips = {
+  "https://en.wikipedia.org/wiki/Main_Page": {
+    "name": "wikipedia.org",
+    "numOfSteps": 2,
+    "steps": [
+      {
+          "attachTo": "#searchform",
+          "title": "Hi",
+          "text": "1",
+          "on": "bottom"
+      },
+      {
+        "attachTo": "#p-lang-btn",
+        "title": "Hi",
+        "text": "2",
+        "on": "top"
+      },
+    ]
+  }
 }
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
-    // console.log(sender.tab ?
-    //             "from a content script:" + sender.tab.url :
-    //             "from the extension");
-    // if (request.greeting === "hello")
-    //   sendResponse({farewell: "goodbye"});
-    sendResponse({hasTooltips: checkUrl(request.url)});
+    if (request.greeting === "hello") 
+      if (availableUrls.includes(sender.tab.url))
+        sendResponse({"status": true, "data": tooltips[sender.tab.url]});
+      else
+        sendResponse({"status": false, "data": null});
   }
 );

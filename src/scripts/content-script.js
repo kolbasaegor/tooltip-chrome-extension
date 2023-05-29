@@ -119,40 +119,21 @@ const addSteps = (tour, data) => {
 }
 
 
-//---------------- main ----------------
-const data = {
-  "websiteName": "doodle",
-  "numOfSteps": 2,
-  "steps": [
-    {
-        "attachTo": "#searchform",
-        "title": "Hi",
-        "text": "1",
-        "on": "bottom"
-    },
-    {
-      "attachTo": "#p-lang-btn",
-      "title": "Hi",
-      "text": "2",
-      "on": "top"
-    },
-  ]
-};
-
-
-console.log("extension is working");
-
-const sendMessage = async () => {
-  const response = await chrome.runtime.sendMessage({url: ""});
-  // do something with response here, not outside the function
-  console.log(response);
+const goTour = async (tour) => {
+  const response = await chrome.runtime.sendMessage({greeting: "hello"});
+  
+  if (response.status) {
+    console.log('tooltips in enabled on this site');
+    addSteps(tour, response.data);
+    tour.start();
+  } else {
+    console.log("tooltips in disabled on this site");
+  }
 }
-// sendMessage();
-// console.log(getCurrentTab());
 
-
+//---------------- main ----------------
+console.log("extension is working");
 includeCss("css/shepherd.css");
 
 const tour = createTour();
-addSteps(tour, data);
-tour.start();
+goTour(tour);
