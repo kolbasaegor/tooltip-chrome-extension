@@ -55,17 +55,21 @@ const tooltips = {
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
-    if (request.msg === "get_tt") {
-      console.log(sender.tab.url);
-      if (availableUrls.includes(sender.tab.url))
-        sendResponse({"status": true, "data": tooltips[sender.tab.url]});
-      else
-        sendResponse({"status": false, "data": null});
-    }
+    if (request.dest === "service") {
+      if (request.query === "anyTooltips?")
+        sendResponse(availableUrls.includes(request.arguments.url));
 
-    else if (request.msg === "is_tt") {
-      sendResponse({"status": availableUrls.includes(sender.tab.url)})
+      if (request.query === "getTooltips") {
+        sendResponse({"status": true, "data": tooltips[sender.tab.url]});
+      }
     }
-    
   }
 );
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    console.log("Расширение установлено");
+  } else if (details.reason === "update") {
+    console.log("Расширение обновлено");
+  }
+});

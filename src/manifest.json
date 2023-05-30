@@ -13,15 +13,16 @@
     },
     "permissions": [
         "activeTab",
+        "tabs",
         "scripting",
-        "tabs"
+        "runtime"
     ],
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
             "run_at": "document_end",
             "js": [
-                "scripts/shepherd.min.js",
+                "lib/shepherd.min.js",
                 "scripts/content-script.js"
             ]
         }

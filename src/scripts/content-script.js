@@ -9,6 +9,7 @@ const includeCss = (pathToCss) => {
 // create Tour
 const createTour = () => {
   return new Shepherd.Tour({
+    useModalOverlay: true,
     defaultStepOptions: {
       cancelIcon: {
         enabled: true
@@ -119,18 +120,34 @@ const addSteps = (tour, data) => {
 }
 
 
-const goTour = async (tour) => {
-  const response = await chrome.runtime.sendMessage({msg: "get_tt"});
-  
-  if (response.status) {
-    console.log('tooltips in enabled on this site');
+const runTour = async () => {
+  if (tour.isActive()) return;
+
+  const response = await chrome.runtime.sendMessage({dest: "service", query: "getTooltips"});
+
+  if (!wasShown) {
     addSteps(tour, response.data);
-    tour.start();
+    wasShown = true;
   }
+  tour.start();
 }
 
 //---------------- main ----------------
 includeCss("css/shepherd.css");
 
-const tour = createTour();
-goTour(tour);
+tour = createTour();
+tour.on('complete', function() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+wasShown = false;
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+    if (request.dest === "content-script") {
+      if (request.query === "runTour") {
+        
+        runTour();
+      }
+    }
+  }
+);
