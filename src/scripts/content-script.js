@@ -1,4 +1,7 @@
-// include css
+/**
+ * Inserts styles into the page where tooltips will be shown
+ * @param {string} pathToCss local path to css file
+ */
 const includeCss = (pathToCss) => {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
@@ -6,10 +9,14 @@ const includeCss = (pathToCss) => {
   document.head.appendChild(link);
 }
 
-// create Tour
-const createTour = () => {
+/**
+ * Creates and returns a tour
+ * @param {JSON} options tooltip information
+ * @returns Shepherd.Tour object
+ */
+const createTour = (options) => {
   return new Shepherd.Tour({
-    useModalOverlay: true,
+    useModalOverlay: options.useModalOverlay,
     defaultStepOptions: {
       cancelIcon: {
         enabled: true
@@ -29,57 +36,78 @@ const createTour = () => {
   });
 }
 
-// add initial tooltip to the tour
-const addInitialStep = (tour, websiteName) => {
+/**
+ * Adds first step to the tour
+ * @param {Shepherd.Tour} tour Shepherd.Tour object
+ * @param {JSON} options tooltip information
+ */
+const addInitialStep = (tour, options) => {
   tour.addStep({
-    title: `<strong>Welcome to ${websiteName}!</strong>`,
-    text: `Tips are available on this site. 
-          They will tell you about the site and teach you how 
-          to use some of the site's elements. 
-          Do you want to go through the tutorial?`,
+    title: options.initialTitle,
+    text: options.initialText,
     buttons: [
       {
         action() {
           return this.complete();
         },
         classes: 'shepherd-button-secondary',
-        text: 'No'
+        text: options.noBtn
       },
       {
         action() {
           return this.next();
         },
-        text: 'Sure'
+        text: options.yesBtn
       }
     ],
   });
 }
 
-// return buttons
-const getButtonsForStep = (step, length) => {
-  if (step === length-1){
+/**
+ * Returns buttons according to step number
+ * @param {number} step step number
+ * @param {JSON} options tooltip information
+ * @returns array of buttons | example ->
+ * [
+      {
+        action() {
+          return this.back();
+        },
+        classes: 'shepherd-button-secondary',
+        text: options.prevBtn
+      },
+      {
+        action() {
+          return this.complete();
+        },
+        text: options.doneBtn
+      }
+    ]
+ */
+const getButtonsForStep = (stepNum, options) => {
+  if (stepNum === options.numOfSteps - 1){
     return [
       {
         action() {
           return this.back();
         },
         classes: 'shepherd-button-secondary',
-        text: 'Back'
+        text: options.prevBtn
       },
       {
         action() {
           return this.complete();
         },
-        text: 'Done'
+        text: options.doneBtn
       }
     ];
-  } else if (step === 0) {
+  } else if (stepNum === 0) {
     return [
       {
         action() {
           return this.next();
         },
-        text: 'Next'
+        text: options.nextBtn
       }
     ];
   } else {
@@ -89,24 +117,29 @@ const getButtonsForStep = (step, length) => {
           return this.back();
         },
         classes: 'shepherd-button-secondary',
-        text: 'Back'
+        text: options.prevBtn
       },
       {
         action() {
           return this.next();
         },
-        text: 'Next'
+        text: options.nextBtn
       }
     ];
   }
 }
 
-// add steps to the tour
-const addSteps = (tour, data) => {
-  addInitialStep(tour, data.name);
+/**
+ * Adds steps to the tour
+ * @param {Shepherd.Tour} tour Shepherd.Tour object 
+ * @param {[JSON]} steps array of steps
+ * @param {JSON} options tooltip information
+ */
+const addSteps = (tour, steps, options) => {
+  addInitialStep(tour, options);
 
-  for (let i = 0; i < data.numOfSteps; i++) {
-    let step = data.steps[i];
+  for (let i = 0; i < options.numOfSteps; i++) {
+    let step = steps[i];
     tour.addStep({
       title: step.title,
       text: step.text,
@@ -114,40 +147,38 @@ const addSteps = (tour, data) => {
         element: step.attachTo,
         on: step.on
       },
-      buttons: getButtonsForStep(i, data.numOfSteps)
+      buttons: getButtonsForStep(i, options)
     });
   }
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------
+var wasShown = false;
 
-const runTour = async () => {
-  if (tour.isActive()) return;
-
-  const response = await chrome.runtime.sendMessage({dest: "service", query: "getTooltips"});
-
-  if (!wasShown) {
-    addSteps(tour, response.data);
-    wasShown = true;
-  }
-  tour.start();
-}
-
-//---------------- main ----------------
-includeCss("css/shepherd.css");
-
-tour = createTour();
-tour.on('complete', function() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-wasShown = false;
-
+/**
+ * Waiting for a command to start showing the tutorial
+ */
 chrome.runtime.onMessage.addListener(
-  (request, sender, sendResponse) => {
-    if (request.dest === "content-script") {
+  async (request) => {
+    if (request.dest === "content-script" )
       if (request.query === "runTour") {
-        
-        runTour();
+        if (wasShown) {
+          if (!tour.isActive())
+            tour.start();
+        } else {
+          includeCss("css/shepherd.css");
+          
+          const response = await chrome.runtime.sendMessage({dest: "service", query: "getTooltips"});
+
+          tour = createTour(response.options);
+          tour.on('complete', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+          addSteps(tour, response.steps, response.options);
+
+          wasShown = true;
+          tour.start();
+        }
       }
-    }
   }
 );

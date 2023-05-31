@@ -82,3 +82,11 @@ justify-content: space-between;
     border-radius: 5px;
 }
 
+.btn {
+  position: relative;
+  font-size: 16px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
