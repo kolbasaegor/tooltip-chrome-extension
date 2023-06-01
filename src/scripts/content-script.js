@@ -152,33 +152,58 @@ const addSteps = (tour, steps, options) => {
   }
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------
-var wasShown = false;
+const anyTooltips = async () => {
+  const response = await chrome.runtime.sendMessage({
+    dest: "service",
+    from: "content-script",
+    query: "anyTooltips?"
+  });
 
-/**
- * Waiting for a command to start showing the tutorial
- */
-chrome.runtime.onMessage.addListener(
-  async (request) => {
-    if (request.dest === "content-script" )
-      if (request.query === "runTour") {
-        if (wasShown) {
-          if (!tour.isActive())
-            tour.start();
-        } else {
-          includeCss("css/shepherd.css");
+  console.log("anyTooltips? -> ", response);
+  return response;
+}
+
+const isTooltipsEnabledForThisSite = async () => {
+  chrome.runtime.sendMessage({
+    dest: "service",
+    from: "content-script",
+    query: "isTooltipsEnabled?"
+  })
+}
+
+const runTour = async () => {
+  includeCss("css/shepherd.css");
           
-          const response = await chrome.runtime.sendMessage({dest: "service", query: "getTooltips"});
+  const response = await chrome.runtime.sendMessage({
+    dest: "service",
+    from: "content-script",
+    query: "getTooltips"
+  });
 
-          tour = createTour(response.options);
-          tour.on('complete', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          });
-          addSteps(tour, response.steps, response.options);
+  tour = createTour(response.options);
+  tour.on('complete', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  addSteps(tour, response.steps, response.options);
 
-          wasShown = true;
-          tour.start();
-        }
-      }
+  tour.start();
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------
+chrome.runtime.onMessage.addListener( async (request) => {
+  if (request.dest === "content-script") {
+    if (request.msg.responseTo === "isTooltipsEnabled?") {
+      if (request.msg.answer) runTour();
+    }
   }
-);
+})
+
+const main = async () => {
+  const isTt = await anyTooltips();
+
+  if (isTt) isTooltipsEnabledForThisSite();
+}
+
+main();
+
+

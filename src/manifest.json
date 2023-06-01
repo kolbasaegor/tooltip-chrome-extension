@@ -15,8 +15,12 @@
         "activeTab",
         "tabs",
         "scripting",
-        "runtime"
+        "runtime",
+        "cookies",
+        "http://*/*",
+        "https://*/*"
     ],
+    "host_permissions": ["<all_urls>"],
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
