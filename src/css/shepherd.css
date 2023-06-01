@@ -2,7 +2,7 @@
     background: #3288e6;
     border: 0;
     border-radius: 3px;
-    color: hsla(0,0%,100%,.75);
+    color: hsla(0, 0%, 100%, .75);
     cursor: pointer;
     margin-right: .5rem;
     padding: .5rem 1.5rem;
@@ -11,17 +11,17 @@
 
 .shepherd-button:not(:disabled):hover {
     background: #196fcc;
-    color: hsla(0,0%,100%,.75)
+    color: hsla(0, 0%, 100%, .75)
 }
 
 .shepherd-button.shepherd-button-secondary {
     background: #f1f2f3;
-    color: rgba(0,0,0,.75)
+    color: rgba(0, 0, 0, .75)
 }
 
 .shepherd-button.shepherd-button-secondary:not(:disabled):hover {
     background: #d6d9db;
-    color: rgba(0,0,0,.75)
+    color: rgba(0, 0, 0, .75)
 }
 
 .shepherd-button:disabled {
@@ -43,7 +43,7 @@
 .shepherd-cancel-icon {
     background: transparent;
     border: none;
-    color: hsla(0,0%,50%,.75);
+    color: hsla(0, 0%, 50%, .75);
     cursor: pointer;
     font-size: 2em;
     font-weight: 400;
@@ -53,19 +53,19 @@
 }
 
 .shepherd-cancel-icon:hover {
-    color: rgba(0,0,0,.75)
+    color: rgba(0, 0, 0, .75)
 }
 
 .shepherd-has-title .shepherd-content .shepherd-cancel-icon {
-    color: hsla(0,0%,50%,.75)
+    color: hsla(0, 0%, 50%, .75)
 }
 
 .shepherd-has-title .shepherd-content .shepherd-cancel-icon:hover {
-    color: rgba(0,0,0,.75)
+    color: rgba(0, 0, 0, .75)
 }
 
 .shepherd-title {
-    color: rgba(0,0,0,.75);
+    color: rgba(0, 0, 0, .75);
     display: flex;
     flex: 1 0 auto;
     font-size: 1rem;
@@ -90,7 +90,7 @@
 }
 
 .shepherd-text {
-    color: rgba(0,0,0,.75);
+    color: rgba(0, 0, 0, .75);
     font-size: 1rem;
     line-height: 1.3em;
     padding: .75em
@@ -113,11 +113,11 @@
 .shepherd-element {
     background: #fff;
     border-radius: 5px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
     max-width: 400px;
     opacity: 0;
     outline: none;
-    transition: opacity .3s,visibility .3s;
+    transition: opacity .3s, visibility .3s;
     visibility: hidden;
     width: 100%;
     z-index: 9999
@@ -134,11 +134,15 @@
     visibility: hidden
 }
 
-.shepherd-element,.shepherd-element *,.shepherd-element :after,.shepherd-element :before {
+.shepherd-element,
+.shepherd-element *,
+.shepherd-element :after,
+.shepherd-element :before {
     box-sizing: border-box
 }
 
-.shepherd-arrow,.shepherd-arrow:before {
+.shepherd-arrow,
+.shepherd-arrow:before {
     height: 16px;
     position: absolute;
     width: 16px;
@@ -175,7 +179,8 @@
     background-color: #e6e6e6
 }
 
-.shepherd-target-click-disabled.shepherd-enabled.shepherd-target,.shepherd-target-click-disabled.shepherd-enabled.shepherd-target * {
+.shepherd-target-click-disabled.shepherd-enabled.shepherd-target,
+.shepherd-target-click-disabled.shepherd-enabled.shepherd-target * {
     pointer-events: none
 }
 
@@ -187,7 +192,7 @@
     pointer-events: none;
     position: fixed;
     top: 0;
-    transition: all .3s ease-out,height 0ms .3s,opacity .3s 0ms;
+    transition: all .3s ease-out, height 0ms .3s, opacity .3s 0ms;
     width: 100vw;
     z-index: 9997
 }
@@ -196,14 +201,13 @@
     height: 100vh;
     opacity: .5;
     transform: translateZ(0);
-    transition: all .3s ease-out,height 0s 0s,opacity .3s 0s
+    transition: all .3s ease-out, height 0s 0s, opacity .3s 0s
 }
 
 .shepherd-modal-overlay-container.shepherd-modal-is-visible path {
     pointer-events: all
 }
 
-.shepherd-content img{
+.shepherd-content img {
     width: 100%;
-  }
-  
+}

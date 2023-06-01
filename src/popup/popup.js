@@ -2,8 +2,8 @@ const addStatus = async (hasTooltips) => {
     const status = document.querySelector("#has-tooltips");
 
     status.textContent = hasTooltips ?
-    "есть" :
-    "нет";
+    "✅ Для этой страницы есть подсказки" :
+    "❌ Для этой страницы нет подсказок";
 }
 
 const getCurrentTabUrl = async () => {
@@ -98,28 +98,3 @@ const main = async () => {
 
 main();
 
-// isTooltipsEnabledForThisSite();
-
-/**
- * Sends to service-worker.js a query to see if the current page has a tooltips
- */
-// chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-//     const url = tabs[0].url;
-//     const response = await chrome.runtime.sendMessage({
-//         dest: "service",
-//         from: "popup",
-//         query: "anyTooltips?",
-//         arguments: {
-//             url: url
-//         }
-//     });
-    
-//     hasTooltipsElement.textContent = response ?
-//     "✅ There are tooltips for this website" :
-//     "❌ There are no tooltips for this website";
-
-//     if (response) {
-//         runTour(tabs[0].id);
-//         createTooltipsCheckbox();
-//     }
-// });

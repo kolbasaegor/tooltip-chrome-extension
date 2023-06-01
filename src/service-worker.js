@@ -1,26 +1,24 @@
 const availableUrls = [
-    "https://en.wikipedia.org/wiki/Main_Page"
+  "https://en.wikipedia.org/wiki/Main_Page",
+  "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
+  "https://github.com/"
 ]
 
 const tooltips = {
   "https://en.wikipedia.org/wiki/Main_Page": {
     options: {
       useModalOverlay: true,
-      initialTitle: `Welcome to wikipedia.org!`,
-      initialText: `jsgyvruyhegruvgh eiyrvg ukfygv eygv jebfv jdfvjbdfh vsdfhjvg`,
       numOfSteps: 2,
-      noBtn: "No",
-      yesBtn: "Yes",
       nextBtn: "Next",
       prevBtn: "Back",
       doneBtn: "Done"
     },
     steps: [
       {
-          attachTo: "#searchform",
-          title: "Поиск",
-          text: "Напишите что-нибудь, может найдете что-нибудь... а может и нет",
-          on: "bottom"
+        attachTo: "#searchform",
+        title: "Поиск",
+        text: "Напишите что-нибудь, может найдете что-нибудь... а может и нет",
+        on: "bottom"
       },
       {
         attachTo: "#p-lang-btn",
@@ -29,6 +27,40 @@ const tooltips = {
         <img src="https://translator-school.com/storage/blogs/February2022/01-kitajskij-yazyk-uchit-ili-ne-uchit.jpg" alt="">`,
         on: "left"
       },
+    ]
+  },
+  "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page": {
+    options: {
+      useModalOverlay: true,
+      numOfSteps: 1,
+      nextBtn: "Next",
+      prevBtn: "Back",
+      doneBtn: "Done"
+    },
+    steps: [
+      {
+        attachTo: ".mw-input.mw-htmlform-nolabel",
+        title: "Log In",
+        text: "Тут даже добавить нечего",
+        on: "right"
+      }
+    ]
+  },
+  "https://github.com/": {
+    options: {
+      useModalOverlay: true,
+      numOfSteps: 1,
+      nextBtn: "Next",
+      prevBtn: "Back",
+      doneBtn: "Done"
+    },
+    steps: [
+      {
+        attachTo: ".search-input-container.search-with-dialog.position-relative.d-flex.flex-row.flex-items-center.mr-4.rounded",
+        title: "Поиск на гитхабе",
+        text: "Можно найти репозитории и пользователей",
+        on: "bottom"
+      }
     ]
   }
 }
@@ -42,11 +74,11 @@ const sendMessageToTab = (id, dest, message) => {
 }
 
 const isTooltipsEnabled = async (url, name) => {
-  const cookie = await chrome.cookies.get({url: url, name: name});
+  const cookie = await chrome.cookies.get({ url: url, name: name });
 
   var answer = false;
-  if(!cookie) {
-    chrome.cookies.set({url: url, name: name, value: "1"});
+  if (!cookie) {
+    chrome.cookies.set({ url: url, name: name, value: "1" });
     answer = true;
   } else {
     answer = cookie.value === "1" ? true : false;
@@ -63,7 +95,11 @@ chrome.runtime.onMessage.addListener(
   async (request, sender, sendResponse) => {
     if (request.dest === "service") {
       if (request.query === "setCookie") {
-        chrome.cookies.set({url: request.url, name: "tooltipsEnabled", value: request.newValue});
+        if (request.from === "popup") {
+          chrome.cookies.set({ url: request.url, name: "tooltipsEnabled", value: request.newValue });
+        } else if (request.from === "content-script") {
+          chrome.cookies.set({ url: sender.origin, name: "tooltipsEnabled", value: request.newValue });
+        }
       }
 
       if (request.query === "isTooltipsEnabled?") {
@@ -74,7 +110,7 @@ chrome.runtime.onMessage.addListener(
             responseTo: request.query,
             answer: isTt
           });
-        } else if (request.from === "popup"){
+        } else if (request.from === "popup") {
           const isTt = await isTooltipsEnabled(request.url, "tooltipsEnabled");
 
           console.log("popup -> ", isTt);
@@ -96,7 +132,7 @@ chrome.runtime.onMessage.addListener(
         } else if (request.from === "popup") {
           sendResponse(availableUrls.includes(request.url));
         }
-      } 
+      }
 
       if (request.query === "getTooltips") {
         sendResponse(tooltips[sender.url]);
