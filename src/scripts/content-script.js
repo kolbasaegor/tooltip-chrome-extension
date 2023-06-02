@@ -3,24 +3,13 @@ const initialMessage = {
   text: `
   На данной странице доступны подсказки, для продолжения 
   нажмите <strong>"Поехали!"</strong>, <br>
-  для отключения подсказок на этом сайте нажмите на 
+  для отключения подсказок на этой странице нажмите на 
   <input type="checkbox" style="cursor: pointer" checked> 
   в оконке расширения или нажмите кнопку <strong>"Ни за что"</strong>. 
   Вы всегда можете вновь включить подсказки в расширении.
   `,
   yesBtn: "Поехали!",
   noBtn: "Ни за что"
-}
-
-const disableTooltips = () => {
-  chrome.runtime.sendMessage({
-    dest: "service",
-    from: "content-script",
-    query: "setCookie",
-    newValue: "0"
-  });
-
-  console.log("tooltips is disabled");
 }
 
 /**
@@ -73,7 +62,7 @@ const addInitialStep = (tour) => {
     buttons: [
       {
         action() {
-          disableTooltips();
+          queryToService("disableTooltipsUrl");
           return this.complete();
         },
         classes: 'shepherd-button-secondary',
@@ -93,22 +82,7 @@ const addInitialStep = (tour) => {
  * Returns buttons according to step number
  * @param {number} step step number
  * @param {JSON} options tooltip information
- * @returns array of buttons | example ->
- * [
-      {
-        action() {
-          return this.back();
-        },
-        classes: 'shepherd-button-secondary',
-        text: options.prevBtn
-      },
-      {
-        action() {
-          return this.complete();
-        },
-        text: options.doneBtn
-      }
-    ]
+ * @returns array of buttons
  */
 const getButtonsForStep = (stepNum, options) => {
   if (stepNum === options.numOfSteps - 1) {
@@ -178,58 +152,57 @@ const addSteps = (tour, steps, options) => {
   }
 }
 
-const anyTooltips = async () => {
-  const response = await chrome.runtime.sendMessage({
-    dest: "service",
-    from: "content-script",
-    query: "anyTooltips?"
-  });
-
-  console.log("anyTooltips? -> ", response);
-  return response;
-}
-
-const isTooltipsEnabledForThisSite = async () => {
-  chrome.runtime.sendMessage({
-    dest: "service",
-    from: "content-script",
-    query: "isTooltipsEnabled?"
-  })
-}
-
-const runTour = async () => {
+const runTour = async (data) => {
   includeCss("css/shepherd.css");
 
-  const response = await chrome.runtime.sendMessage({
-    dest: "service",
-    from: "content-script",
-    query: "getTooltips"
-  });
-
-  tour = createTour(response.options);
-  tour.on('complete', function () {
+  tour = createTour(data.options);
+  tour.on('complete', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  addSteps(tour, response.steps, response.options);
+  addSteps(tour, data.steps, data.options);
 
   tour.start();
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-chrome.runtime.onMessage.addListener(async (request) => {
-  if (request.dest === "content-script") {
-    if (request.msg.responseTo === "isTooltipsEnabled?") {
-      if (request.msg.answer) runTour();
-    }
-  }
-})
-
-const main = async () => {
-  const isTt = await anyTooltips();
-
-  if (isTt) isTooltipsEnabledForThisSite();
+const queryToService = (query) => {
+  chrome.runtime.sendMessage({
+    dest: "service",
+    from: "content-script",
+    query: query
+  });
 }
 
-main();
+const resolveService = async (response) => {
+  switch(response.msg.respondTo) {
+    case "isTooltips?url":
+      if (response.msg.answer) queryToService("isTooltipsEnabled?site");
+      break;
+
+    case "isTooltipsEnabled?site":
+      if (response.msg.answer) queryToService("isTooltipsEnabled?url");
+      break;
+
+    case "isTooltipsEnabled?url":
+      if (response.msg.answer) queryToService("getTooltips");
+      break;
+
+    case "getTooltips":
+      runTour(response.msg.answer);
+      break;
+  }
+}
+
+const resolve = (request) => {
+  if (request.dest != "content-script") return;
+
+  if (request.from === "service") resolveService(request);
+}
+
+chrome.runtime.onMessage.addListener(async (request) => {
+  resolve(request);
+})
+
+queryToService("isTooltips?url");
 
 

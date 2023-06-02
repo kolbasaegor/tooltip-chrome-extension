@@ -1,3 +1,8 @@
+const availableSites = [
+  "https://github.com",
+  "https://en.wikipedia.org"
+]
+
 const availableUrls = [
   "https://en.wikipedia.org/wiki/Main_Page",
   "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
@@ -65,26 +70,147 @@ const tooltips = {
   }
 }
 
-const sendMessageToTab = (id, dest, message) => {
+const sendMessageToContentScript = (id, message) => {
   chrome.tabs.sendMessage(id, {
-    dest: dest,
+    dest: "content-script",
     from: "service",
     msg: message
   });
 }
 
-const isTooltipsEnabled = async (url, name) => {
+const sendMessageToPopup = (message) => {
+  chrome.runtime.sendMessage({
+    dest: "popup",
+    from: "service",
+    msg: message
+  });
+}
+
+const getCookie = async (url, name, defaultValue="1") => {
   const cookie = await chrome.cookies.get({ url: url, name: name });
 
-  var answer = false;
   if (!cookie) {
-    chrome.cookies.set({ url: url, name: name, value: "1" });
-    answer = true;
+    const newCookie = await chrome.cookies.set({
+      url: url, 
+      name: name, 
+      expirationDate: (new Date().getTime() / 1000) + 60*60*24*30,
+      value: defaultValue
+    });
+    return newCookie;
   } else {
-    answer = cookie.value === "1" ? true : false;
+    return cookie;
   }
+}
 
-  return answer;
+const setCookie = (url, name, value) => {
+  chrome.cookies.set({
+    url: url, 
+    name: name, 
+    value: value,
+    expirationDate: (new Date().getTime() / 1000) + 60*60*24*30
+  });
+}
+
+const isTooltipsExist = async (on, url) => {
+  if (on === "site") return availableSites.includes(url);
+  if (on === "url") return availableUrls.includes(url);
+}
+
+const isTooltipsEnabled = async (on, url) => {
+  const cookieName = on === "site" ? "tooltips_enabled_site" : "tooltips_enabled_url";
+  const cookie = await getCookie(url, cookieName);
+
+  return cookie.value === "1" ? true : false;
+}
+
+const resolveContentScript = async (request, sender) => {
+  switch(request.query) {
+    case "isTooltips?url":
+      var answer = await isTooltipsExist("url", sender.url);
+      sendMessageToContentScript(sender.tab.id, {
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "isTooltipsEnabled?site":
+      var answer = await isTooltipsEnabled("site", sender.origin);
+      sendMessageToContentScript(sender.tab.id, {
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "isTooltipsEnabled?url":
+      var answer = await isTooltipsEnabled("url", sender.url);
+      sendMessageToContentScript(sender.tab.id, {
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "disableTooltipsUrl":
+      setCookie(sender.url, "tooltips_enabled_url", "0");
+      break;
+
+    case "getTooltips":
+      sendMessageToContentScript(sender.tab.id, {
+        respondTo: request.query,
+        answer: tooltips[sender.url]
+      });
+      break;
+  }
+}
+
+const resolvePopup = async (request) => {
+  switch(request.query) {
+    case "isTooltips?site":
+      var answer = await isTooltipsExist("site", request.parameters.url);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "isTooltips?url":
+      var answer = await isTooltipsExist("url", request.parameters.url);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "isTooltipsEnabled?site":
+      var answer = await isTooltipsEnabled("site", request.parameters.url);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "isTooltipsEnabled?url":
+      var answer = await isTooltipsEnabled("url", request.parameters.url);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "setCookieUrl":
+      setCookie(request.parameters.url, "tooltips_enabled_url", request.parameters.value);
+      break;
+
+    case "setCookieSite":
+      setCookie(request.parameters.url, "tooltips_enabled_site", request.parameters.value);
+      break;
+  }
+}
+
+const resolve = (request, sender) => {
+  if (request.dest != "service") return;
+
+  if (request.from === "content-script") resolveContentScript(request, sender);
+  if (request.from === "popup") resolvePopup(request);
 }
 
 
@@ -92,52 +218,6 @@ const isTooltipsEnabled = async (url, name) => {
  * Listens to messages from popup.js and content-script.js and respond to them
  */
 chrome.runtime.onMessage.addListener(
-  async (request, sender, sendResponse) => {
-    if (request.dest === "service") {
-      if (request.query === "setCookie") {
-        if (request.from === "popup") {
-          chrome.cookies.set({ url: request.url, name: "tooltipsEnabled", value: request.newValue });
-        } else if (request.from === "content-script") {
-          chrome.cookies.set({ url: sender.origin, name: "tooltipsEnabled", value: request.newValue });
-        }
-      }
-
-      if (request.query === "isTooltipsEnabled?") {
-        if (request.from === "content-script") {
-          const isTt = await isTooltipsEnabled(sender.origin, "tooltipsEnabled");
-
-          sendMessageToTab(sender.tab.id, "content-script", {
-            responseTo: request.query,
-            answer: isTt
-          });
-        } else if (request.from === "popup") {
-          const isTt = await isTooltipsEnabled(request.url, "tooltipsEnabled");
-
-          console.log("popup -> ", isTt);
-
-          chrome.runtime.sendMessage({
-            dest: "popup",
-            from: "service",
-            msg: {
-              responseTo: request.query,
-              answer: isTt
-            }
-          });
-        }
-      }
-
-      if (request.query === "anyTooltips?") {
-        if (request.from === "content-script") {
-          sendResponse(availableUrls.includes(sender.url));
-        } else if (request.from === "popup") {
-          sendResponse(availableUrls.includes(request.url));
-        }
-      }
-
-      if (request.query === "getTooltips") {
-        sendResponse(tooltips[sender.url]);
-      }
-    }
-  }
+  async (request, sender) => { resolve(request, sender); }
 );
 
