@@ -1,15 +1,26 @@
-const content = document.querySelector(".content");
-
+/**
+ * get current tab ulr
+ * @returns current tab url
+ */
 const getCurrentTabUrl = async () => {
     const currentTab = await chrome.tabs.query({ active: true, currentWindow: true });
     return currentTab[0].url;
 }
 
+/**
+ * get origin of the page
+ * @returns current tab origin url
+ */
 const getOrigin = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     return new URL(tabs[0].url).origin;
 }
 
+/**
+ * creates an element that shows the presence of tooltips on the site, 
+ * if there are any, it also creates a checkbox for them
+ * @param {boolean} status are there any tooltips for this site
+ */
 const firstLine = async (status) => {
     const statusElem = document.createElement("div");
     statusElem.id = "site-has-tooltips";
@@ -27,6 +38,11 @@ const firstLine = async (status) => {
     if (status) queryToService("isTooltipsEnabled?site", {url: origin});
 }
 
+/**
+ * creates a checkbox with which you can 
+ * enable/disable tooltips on the site
+ * @param {boolean} status are tooltips for this site enabled in cookies
+ */
 const firstLineCheckbox = async (status) => {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -52,6 +68,11 @@ const firstLineCheckbox = async (status) => {
     if (status) queryToService("isTooltips?url", {url: url});
 }
 
+/**
+ * creates an element that shows the presence of tooltips on the url, 
+ * if there are any, it also creates a checkbox for them
+ * @param {boolean} status are there any tooltips for this url
+ */
 const secondLine = async (status) => {
     const statusElem = document.createElement("div");
     statusElem.id = "url-has-tooltips";
@@ -69,6 +90,11 @@ const secondLine = async (status) => {
     if (status) queryToService("isTooltipsEnabled?url", {url: url});
 }
 
+/**
+ * creates a checkbox with which you can 
+ * enable/disable tooltips on the url
+ * @param {boolean} status are tooltips for this url enabled in cookies
+ */
 const secondLineCheckbox = async (status) => {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -89,7 +115,11 @@ const secondLineCheckbox = async (status) => {
     });
 }
 
-
+/**
+ * send a request to service-worker.js
+ * @param {string} query 
+ * @param {JSON} parameters 
+ */
 const queryToService = (query, parameters) => {
   chrome.runtime.sendMessage({
     dest: "service",
@@ -99,6 +129,10 @@ const queryToService = (query, parameters) => {
   });
 }
 
+/**
+ * processes responses from service-worker.js
+ * @param {JSON} response response from service-worker.js
+ */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
     case "isTooltips?site":
@@ -119,20 +153,30 @@ const resolveService = async (response) => {
   }
 }
 
+/**
+ * processes responses from other components
+ * @param {JSON} request request from other components
+ */
 const resolve = (request) => {
   if (request.dest != "popup") return;
 
   if (request.from === "service") resolveService(request);
 }
 
+/**
+ * Listens to messages from service-worker.js and content-script.js
+ */
 chrome.runtime.onMessage.addListener(async (request) => {
   resolve(request);
 })
 
-
+/**
+ * entry point
+ */
 const main = async () => {
     const origin = await getOrigin();
     queryToService("isTooltips?site", {url: origin});
 }
 
-main();
+const content = document.querySelector(".content"); // global variable
+main(); // <-- entry point is here

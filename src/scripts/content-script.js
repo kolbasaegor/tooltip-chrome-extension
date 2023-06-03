@@ -2,8 +2,8 @@ const initialMessage = {
   title: `<strong>Ну и дела...</strong>`,
   text: `
   На данной странице доступны подсказки, для продолжения 
-  нажмите <strong>"Поехали!"</strong>, <br>
-  для отключения подсказок на этой странице нажмите на 
+  нажмите <strong>"Поехали!"</strong>. <br>
+  Для отключения подсказок на этой странице нажмите на 
   <input type="checkbox" style="cursor: pointer" checked> 
   в оконке расширения или нажмите кнопку <strong>"Ни за что"</strong>. 
   Вы всегда можете вновь включить подсказки в расширении.
@@ -152,6 +152,10 @@ const addSteps = (tour, steps, options) => {
   }
 }
 
+/**
+ * creates and runs tour on the page
+ * @param {JSON} data options and steps of the tour
+ */
 const runTour = async (data) => {
   includeCss("css/shepherd.css");
 
@@ -164,7 +168,10 @@ const runTour = async (data) => {
   tour.start();
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------
+/**
+ * send a request to service-worker.js
+ * @param {string} query 
+ */
 const queryToService = (query) => {
   chrome.runtime.sendMessage({
     dest: "service",
@@ -173,6 +180,10 @@ const queryToService = (query) => {
   });
 }
 
+/**
+ * processes responses from service-worker.js
+ * @param {JSON} response response from service-worker.js
+ */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
     case "isTooltips?url":
@@ -193,16 +204,23 @@ const resolveService = async (response) => {
   }
 }
 
+/**
+ * processes responses from other components
+ * @param {JSON} request request from other components
+ */
 const resolve = (request) => {
   if (request.dest != "content-script") return;
 
   if (request.from === "service") resolveService(request);
 }
 
+/**
+ * Listens to messages from service-worker.js and popup.js
+ */
 chrome.runtime.onMessage.addListener(async (request) => {
   resolve(request);
 })
 
-queryToService("isTooltips?url");
+queryToService("isTooltips?url"); // <-- entry point is here
 
 

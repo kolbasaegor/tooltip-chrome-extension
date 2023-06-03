@@ -70,6 +70,11 @@ const tooltips = {
   }
 }
 
+/**
+ * sends message to content-script.js
+ * @param {number} id content script tab id
+ * @param {JSON | boolean} message message to content script
+ */
 const sendMessageToContentScript = (id, message) => {
   chrome.tabs.sendMessage(id, {
     dest: "content-script",
@@ -78,6 +83,10 @@ const sendMessageToContentScript = (id, message) => {
   });
 }
 
+/**
+ * sends message to popup.js
+ * @param {JSON | boolean} message message to popup
+ */
 const sendMessageToPopup = (message) => {
   chrome.runtime.sendMessage({
     dest: "popup",
@@ -86,6 +95,15 @@ const sendMessageToPopup = (message) => {
   });
 }
 
+/**
+ * searches for and returns cookies with the
+ * given parameters, if not then creates 
+ * it with a value = defaultValue
+ * @param {string} url 
+ * @param {string} name 
+ * @param {string} defaultValue 
+ * @returns cookie
+ */
 const getCookie = async (url, name, defaultValue="1") => {
   const cookie = await chrome.cookies.get({ url: url, name: name });
 
@@ -102,6 +120,12 @@ const getCookie = async (url, name, defaultValue="1") => {
   }
 }
 
+/**
+ * set cookie with given parameters
+ * @param {string} url 
+ * @param {string} name 
+ * @param {string} value 
+ */
 const setCookie = (url, name, value) => {
   chrome.cookies.set({
     url: url, 
@@ -111,11 +135,23 @@ const setCookie = (url, name, value) => {
   });
 }
 
+/**
+ * checks if there are tooltips for the given url
+ * @param {string} on where to see
+ * @param {string} url url of the page
+ * @returns boolean
+ */
 const isTooltipsExist = async (on, url) => {
   if (on === "site") return availableSites.includes(url);
   if (on === "url") return availableUrls.includes(url);
 }
 
+/**
+ * checks if tooltips enabled for the given url
+ * @param {string} on where to see
+ * @param {string} url url of the page
+ * @returns boolean
+ */
 const isTooltipsEnabled = async (on, url) => {
   const cookieName = on === "site" ? "tooltips_enabled_site" : "tooltips_enabled_url";
   const cookie = await getCookie(url, cookieName);
@@ -123,6 +159,10 @@ const isTooltipsEnabled = async (on, url) => {
   return cookie.value === "1" ? true : false;
 }
 
+/**
+ * processes requests from content-script.js
+ * @param {JSON} request request from content-script.js
+ */
 const resolveContentScript = async (request, sender) => {
   switch(request.query) {
     case "isTooltips?url":
@@ -162,6 +202,10 @@ const resolveContentScript = async (request, sender) => {
   }
 }
 
+/**
+ * processes requests from popup.js
+ * @param {JSON} request request from popup.js
+ */
 const resolvePopup = async (request) => {
   switch(request.query) {
     case "isTooltips?site":
@@ -206,6 +250,11 @@ const resolvePopup = async (request) => {
   }
 }
 
+/**
+ * processes responses from other components
+ * @param {JSON} request request from other components
+ * @param {JSON} sender the one from whom the request came
+ */
 const resolve = (request, sender) => {
   if (request.dest != "service") return;
 
