@@ -1,74 +1,4 @@
-const availableSites = [
-  "https://github.com",
-  "https://en.wikipedia.org"
-]
-
-const availableUrls = [
-  "https://en.wikipedia.org/wiki/Main_Page",
-  "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page",
-  "https://github.com/"
-]
-
-const tooltips = {
-  "https://en.wikipedia.org/wiki/Main_Page": {
-    options: {
-      useModalOverlay: true,
-      numOfSteps: 2,
-      nextBtn: "Next",
-      prevBtn: "Back",
-      doneBtn: "Done"
-    },
-    steps: [
-      {
-        attachTo: "#searchform",
-        title: "Поиск",
-        text: "Напишите что-нибудь, может найдете что-нибудь... а может и нет",
-        on: "bottom"
-      },
-      {
-        attachTo: "#p-lang-btn",
-        title: "Языки",
-        text: `В википедии представлены статьи на 40+ языках
-        <img src="https://translator-school.com/storage/blogs/February2022/01-kitajskij-yazyk-uchit-ili-ne-uchit.jpg" alt="">`,
-        on: "left"
-      },
-    ]
-  },
-  "https://en.wikipedia.org/w/index.php?title=Special:UserLogin&returnto=Main+Page": {
-    options: {
-      useModalOverlay: true,
-      numOfSteps: 1,
-      nextBtn: "Next",
-      prevBtn: "Back",
-      doneBtn: "Done"
-    },
-    steps: [
-      {
-        attachTo: ".mw-input.mw-htmlform-nolabel",
-        title: "Log In",
-        text: "Тут даже добавить нечего",
-        on: "right"
-      }
-    ]
-  },
-  "https://github.com/": {
-    options: {
-      useModalOverlay: true,
-      numOfSteps: 1,
-      nextBtn: "Next",
-      prevBtn: "Back",
-      doneBtn: "Done"
-    },
-    steps: [
-      {
-        attachTo: ".search-input-container.search-with-dialog.position-relative.d-flex.flex-row.flex-items-center.mr-4.rounded",
-        title: "Поиск на гитхабе",
-        text: "Можно найти репозитории и пользователей",
-        on: "bottom"
-      }
-    ]
-  }
-}
+import * as db from "./db/db.js";
 
 /**
  * sends message to content-script.js
@@ -142,8 +72,8 @@ const setCookie = (url, name, value) => {
  * @returns boolean
  */
 const isTooltipsExist = async (on, url) => {
-  if (on === "site") return availableSites.includes(url);
-  if (on === "url") return availableUrls.includes(url);
+  if (on === "site") return db.isTooltipsDomain(url);
+  if (on === "url") return db.isTooltipsUrl(url);
 }
 
 /**
@@ -157,6 +87,20 @@ const isTooltipsEnabled = async (on, url) => {
   const cookie = await getCookie(url, cookieName);
 
   return cookie.value === "1" ? true : false;
+}
+
+/**
+ * returns tooltips for given url
+ * @param {string} url 
+ * @returns JSON tooltips for given url
+ */
+const getTooltips = async (url) => {
+  const data = await db.getTooltips(url);
+
+  return {
+    options: data.options,
+    steps: data.steps.arr
+  };
 }
 
 /**
@@ -194,9 +138,11 @@ const resolveContentScript = async (request, sender) => {
       break;
 
     case "getTooltips":
+      const tooltips = await getTooltips(sender.url);
+
       sendMessageToContentScript(sender.tab.id, {
         respondTo: request.query,
-        answer: tooltips[sender.url]
+        answer: tooltips
       });
       break;
   }
@@ -269,4 +215,3 @@ const resolve = (request, sender) => {
 chrome.runtime.onMessage.addListener(
   async (request, sender) => { resolve(request, sender); }
 );
-
