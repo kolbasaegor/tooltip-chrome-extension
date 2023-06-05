@@ -94,14 +94,60 @@ const isTooltipsEnabled = async (on, url) => {
  * @param {string} url 
  * @returns JSON tooltips for given url
  */
-const getTooltips = async (url) => {
-  const data = await db.getTooltips(url);
+const getTooltips = async (url, type) => {
+  const data = await db.getTooltips(url, type);
 
   return {
     options: data.options,
     steps: data.steps.arr
   };
 }
+
+const isEmptyObject = (obj) => {
+  return Object.keys(obj).length == 0;
+}
+
+const getUserStatus = async () => {
+  var status = await chrome.storage.local.get(["user_status"]);
+  
+  if (isEmptyObject(status)) {
+    chrome.storage.local.set({ user_status: "default"});
+    return "default";
+  }
+
+  return status.user_status;
+}
+
+const setUserStatus = async (status) => {
+  chrome.storage.local.set({ user_status: status });
+}
+
+const getUsername = async () => {
+  const username = await chrome.storage.local.get(["username"]);
+
+  return username.username;
+}
+
+const setUsername = async (username) => {
+  chrome.storage.local.set({ username: username });
+}
+
+const isUserLoggedIn = async () => {
+  var status = await chrome.storage.local.get(["logged_in"]);
+  
+  if (isEmptyObject(status)) {
+    chrome.storage.local.set({ logged_in: false});
+    return false;
+  }
+
+  return status.logged_in;
+}
+
+const userLoggedIn = async () => {
+  chrome.storage.local.set({ logged_in: true });
+}
+
+
 
 /**
  * processes requests from content-script.js
@@ -138,7 +184,8 @@ const resolveContentScript = async (request, sender) => {
       break;
 
     case "getTooltips":
-      const tooltips = await getTooltips(sender.url);
+      const status = await getUserStatus();
+      const tooltips = await getTooltips(sender.url, status);
 
       sendMessageToContentScript(sender.tab.id, {
         respondTo: request.query,
@@ -154,6 +201,38 @@ const resolveContentScript = async (request, sender) => {
  */
 const resolvePopup = async (request) => {
   switch(request.query) {
+    case "isUserLoggedIn?":
+      var answer = await isUserLoggedIn();
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "getUsername":
+      var answer = await getUsername();
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "setUsername":
+      setUsername(request.parameters.username);
+      break;
+
+    case "getUserStatus":
+      var answer = await getUserStatus();
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "setUserStatus":
+      setUserStatus(request.parameters.status);
+      break;
+
     case "isTooltips?site":
       var answer = await isTooltipsExist("site", request.parameters.url);
       sendMessageToPopup({

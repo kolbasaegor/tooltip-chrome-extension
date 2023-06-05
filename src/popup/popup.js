@@ -115,12 +115,93 @@ const secondLineCheckbox = async (status) => {
     });
 }
 
+const footer = () => {
+    const loginButton = document.createElement("a");
+    loginButton.href = "#";
+    loginButton.textContent = "login";
+
+    const registerButton = document.createElement("a");
+    registerButton.href = "#";
+    registerButton.textContent = "register";
+
+    loginButton.onclick = () => {
+        hideRegisterForm();
+        showLoginForm();
+    }
+
+    registerButton.onclick = () => {
+        hideLoginForm();
+        showRegisterForm();
+    }
+
+    const footer = document.querySelector(".footer");
+    footer.appendChild(loginButton);
+    footer.appendChild(registerButton);
+}
+
+const createLoginForm = async () => {
+    const loginFrom = document.createElement("div");
+    loginFrom.id = "login-form";
+    loginFrom.className = "entry";
+
+    const title = document.createElement("p");
+    title.textContent = "Log In Form";
+
+    const loginTitle = document.createElement("p");
+    loginTitle.textContent = "login:";
+
+    const passwordTitle = document.createElement("p");
+    passwordTitle.textContent = "password:";
+
+    loginFrom.appendChild(title);
+    loginFrom.appendChild(loginTitle);
+    loginFrom.appendChild(passwordTitle);
+    loginFrom.hidden = true;
+
+    setTimeout(() => {
+        content.appendChild(loginFrom);
+    }, "1000");
+}
+
+const createRegisterForm = async () => {
+    const registerFrom = document.createElement("div");
+    registerFrom.id = "register-form";
+    registerFrom.className = "entry";
+    registerFrom.hidden = true;
+
+    registerFrom.textContent = "Register Form:";
+
+    setTimeout(() => {
+        content.appendChild(registerFrom);
+    }, "1500");
+}
+
+const showRegisterForm = () => {
+    const registerFrom = document.querySelector("#register-form");
+    registerFrom.hidden = false;
+}
+
+const hideRegisterForm = () => {
+    const registerFrom = document.querySelector("#register-form");
+    registerFrom.hidden = true;
+}
+
+const showLoginForm = () => {
+    const loginFrom = document.querySelector("#login-form");
+    loginFrom.hidden = false;
+}
+
+const hideLoginForm = () => {
+    const loginFrom = document.querySelector("#login-form");
+    loginFrom.hidden = true;
+}
+
 /**
  * send a request to service-worker.js
  * @param {string} query 
  * @param {JSON} parameters 
  */
-const queryToService = (query, parameters) => {
+const queryToService = (query, parameters={}) => {
   chrome.runtime.sendMessage({
     dest: "service",
     from: "popup",
@@ -135,6 +216,10 @@ const queryToService = (query, parameters) => {
  */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
+    case "isUserLoggedIn?":
+        if (!response.msg.answer) footer();
+        break;
+
     case "isTooltips?site":
         firstLine(response.msg.answer);
         break;
@@ -149,6 +234,10 @@ const resolveService = async (response) => {
 
     case "isTooltipsEnabled?url":
         secondLineCheckbox(response.msg.answer);
+        break;
+
+    case "getUserStatus":
+        console.log(response.msg.answer);
         break;
   }
 }
@@ -174,8 +263,12 @@ chrome.runtime.onMessage.addListener(async (request) => {
  * entry point
  */
 const main = async () => {
+    createLoginForm();
+    createRegisterForm();
+
     const origin = await getOrigin();
-    queryToService("isTooltips?site", {url: origin});
+    queryToService("isTooltips?site", {url: origin});;
+    queryToService("isUserLoggedIn?");
 }
 
 const content = document.querySelector(".content"); // global variable

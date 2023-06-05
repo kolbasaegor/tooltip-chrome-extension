@@ -79,66 +79,15 @@ const addInitialStep = (tour) => {
 }
 
 /**
- * Returns buttons according to step number
- * @param {number} step step number
- * @param {JSON} options tooltip information
- * @returns array of buttons
- */
-const getButtonsForStep = (stepNum, options) => {
-  if (stepNum === options.numOfSteps - 1) {
-    return [
-      {
-        action() {
-          return this.back();
-        },
-        classes: 'shepherd-button-secondary',
-        text: options.prevBtn
-      },
-      {
-        action() {
-          return this.complete();
-        },
-        text: options.doneBtn
-      }
-    ];
-  } else if (stepNum === 0) {
-    return [
-      {
-        action() {
-          return this.next();
-        },
-        text: options.nextBtn
-      }
-    ];
-  } else {
-    return [
-      {
-        action() {
-          return this.back();
-        },
-        classes: 'shepherd-button-secondary',
-        text: options.prevBtn
-      },
-      {
-        action() {
-          return this.next();
-        },
-        text: options.nextBtn
-      }
-    ];
-  }
-}
-
-/**
  * Adds steps to the tour
  * @param {Shepherd.Tour} tour Shepherd.Tour object 
  * @param {[JSON]} steps array of steps
  * @param {JSON} options tooltip information
  */
-const addSteps = (tour, steps, options) => {
+const addSteps = (tour, steps) => {
   addInitialStep(tour);
 
-  for (let i = 0; i < options.numOfSteps; i++) {
+  for (let i = 0; i < steps.length; i++) {
     let step = steps[i];
     tour.addStep({
       title: step.title,
@@ -147,7 +96,21 @@ const addSteps = (tour, steps, options) => {
         element: step.attachTo,
         on: step.on
       },
-      buttons: getButtonsForStep(i, options)
+      buttons: [
+        {
+          action() {
+            return this.back();
+          },
+          classes: 'shepherd-button-secondary',
+          text: step.prevBtn
+        },
+        {
+          action() {
+            return this.next();
+          },
+          text: step.nextBtn
+        }
+      ]
     });
   }
 }
@@ -163,7 +126,7 @@ const runTour = async (data) => {
   tour.on('complete', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  addSteps(tour, data.steps, data.options);
+  addSteps(tour, data.steps);
 
   tour.start();
 }

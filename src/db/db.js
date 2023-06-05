@@ -3,11 +3,11 @@ import { _supabase } from "./supabase.js";
 export const isTooltipsDomain = async (url) => {
     const { data, error } = await _supabase
     .from('available_domain')
-    .select('*')
+    .select('id')
     .eq("url", url)
     .limit(1);
 
-    return data.length === 1 ? true : false;
+    return data.length == 1 ? true : false;
 }
 
 export const isTooltipsUrl = async (url) => {
@@ -17,15 +17,17 @@ export const isTooltipsUrl = async (url) => {
     .eq("url", url)
     .limit(1);
 
-    return data.length === 1 ? true : false;
+    return data.length == 1 ? true : false;
 }
 
-export const getTooltips = async (url) => {
+export const getTooltips = async (url, type) => {
     const { data, error } = await _supabase
     .from('available_url')
-    .select('options, steps')
+    .select(`tooltip_set ( options, steps, type )`)
     .eq('url', url)
-    .limit(1);
+    .eq('tooltip_set.type', type);
 
-    return data.length != 0 ? data[0] : null;
+    if (data.length == 0) return null;
+
+    return data[0].tooltip_set[0];
 }
