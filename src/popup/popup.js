@@ -115,7 +115,7 @@ const secondLineCheckbox = async (status) => {
     });
 }
 
-const footer = () => {
+const footer_not_logged = () => {
     const loginButton = document.createElement("a");
     loginButton.href = "#";
     loginButton.textContent = "login";
@@ -139,27 +139,56 @@ const footer = () => {
     footer.appendChild(registerButton);
 }
 
+const footer_logged = () => {
+    const logoutButton = document.createElement("a");
+    logoutButton.href = "#";
+    logoutButton.textContent = "logout";
+
+    logoutButton.onclick = () => {
+        queryToService("logoutUser");
+        location.reload();
+    }
+
+    const footer = document.querySelector(".footer");
+    footer.appendChild(logoutButton);
+}
+
 const createLoginForm = async () => {
-    const loginFrom = document.createElement("div");
-    loginFrom.id = "login-form";
-    loginFrom.className = "entry";
+    const loginForm = document.createElement("form");
+    loginForm.id = "login-form";
+    loginForm.className = "entry";
+    loginForm.hidden = true;
+    loginForm.onsubmit = () => {
+        queryToService("loginUser", {
+            login: loginField.value,
+            password: passwordField.value
+        });
+    }
 
     const title = document.createElement("p");
-    title.textContent = "Log In Form";
+    title.textContent = "Log In form";
 
-    const loginTitle = document.createElement("p");
-    loginTitle.textContent = "login:";
+    const loginField = document.createElement("input");
+    loginField.type = "text";
+    loginField.required = true;
+    loginField.placeholder = "login";
 
-    const passwordTitle = document.createElement("p");
-    passwordTitle.textContent = "password:";
+    const passwordField = document.createElement("input");
+    passwordField.type = "password";
+    passwordField.required = true;
+    passwordField.placeholder = "password";
 
-    loginFrom.appendChild(title);
-    loginFrom.appendChild(loginTitle);
-    loginFrom.appendChild(passwordTitle);
-    loginFrom.hidden = true;
+    const submitButton = document.createElement("input");
+    submitButton.type = "submit";
+    submitButton.value = "login";
+
+    loginForm.appendChild(title);
+    loginForm.appendChild(loginField);
+    loginForm.appendChild(passwordField);
+    loginForm.appendChild(submitButton);
 
     setTimeout(() => {
-        content.appendChild(loginFrom);
+        content.appendChild(loginForm);
     }, "1000");
 }
 
@@ -173,7 +202,26 @@ const createRegisterForm = async () => {
 
     setTimeout(() => {
         content.appendChild(registerFrom);
-    }, "1500");
+    }, "1000");
+}
+
+const showUserAndStatus = (isLoggedIn, _status, login) => {
+    const header = document.querySelector(".header");
+
+    const container = document.createElement("div");
+    container.className = "container";
+
+    const username = document.createElement("p");
+    username.className = "username";
+    username.textContent = isLoggedIn ? login : "unauthorized";
+
+    const status = document.createElement("p");
+    status.className = "status";
+    status.textContent = _status;
+
+    container.appendChild(username);
+    container.appendChild(status);
+    header.appendChild(container);
 }
 
 const showRegisterForm = () => {
@@ -201,7 +249,7 @@ const hideLoginForm = () => {
  * @param {string} query 
  * @param {JSON} parameters 
  */
-const queryToService = (query, parameters={}) => {
+const queryToService = async (query, parameters={}) => {
   chrome.runtime.sendMessage({
     dest: "service",
     from: "popup",
@@ -216,8 +264,20 @@ const queryToService = (query, parameters={}) => {
  */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
-    case "isUserLoggedIn?":
-        if (!response.msg.answer) footer();
+    case "loginUser":
+        if (response.msg.answer) location.reload();
+        break;
+
+    case "getUser":
+        showUserAndStatus(
+            response.msg.answer.isLoggedIn,
+            response.msg.answer.status,
+            response.msg.answer.login
+        );
+
+        response.msg.answer.isLoggedIn ?
+        footer_logged() :
+        footer_not_logged();
         break;
 
     case "isTooltips?site":
@@ -234,10 +294,6 @@ const resolveService = async (response) => {
 
     case "isTooltipsEnabled?url":
         secondLineCheckbox(response.msg.answer);
-        break;
-
-    case "getUserStatus":
-        console.log(response.msg.answer);
         break;
   }
 }
@@ -263,12 +319,12 @@ chrome.runtime.onMessage.addListener(async (request) => {
  * entry point
  */
 const main = async () => {
+    queryToService("getUser");
     createLoginForm();
     createRegisterForm();
 
     const origin = await getOrigin();
     queryToService("isTooltips?site", {url: origin});;
-    queryToService("isUserLoggedIn?");
 }
 
 const content = document.querySelector(".content"); // global variable

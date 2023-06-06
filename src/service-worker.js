@@ -107,46 +107,42 @@ const isEmptyObject = (obj) => {
   return Object.keys(obj).length == 0;
 }
 
-const getUserStatus = async () => {
-  var status = await chrome.storage.local.get(["user_status"]);
-  
-  if (isEmptyObject(status)) {
-    chrome.storage.local.set({ user_status: "default"});
-    return "default";
+const loginUser = async (login, password) => {
+  const user = await db.getUser(login, password);
+
+  if (!user) return false;
+
+  chrome.storage.local.set(user);
+  return true;
+}
+
+const logoutUser = async () => {
+  chrome.storage.local.set({
+    user: {
+      isLoggedIn: false,
+      login: null,
+      status: "default"
+    }
+  });
+}
+
+const getUser = async () => {
+  const user = await chrome.storage.local.get(["user"]);
+
+  if (isEmptyObject(user)) {
+    const newUser = {
+      user: {
+        isLoggedIn: false,
+        login: null,
+        status: "default"
+      }
+    };
+    chrome.storage.local.set(newUser);
+    return newUser.user;
   }
 
-  return status.user_status;
+  return user.user;
 }
-
-const setUserStatus = async (status) => {
-  chrome.storage.local.set({ user_status: status });
-}
-
-const getUsername = async () => {
-  const username = await chrome.storage.local.get(["username"]);
-
-  return username.username;
-}
-
-const setUsername = async (username) => {
-  chrome.storage.local.set({ username: username });
-}
-
-const isUserLoggedIn = async () => {
-  var status = await chrome.storage.local.get(["logged_in"]);
-  
-  if (isEmptyObject(status)) {
-    chrome.storage.local.set({ logged_in: false});
-    return false;
-  }
-
-  return status.logged_in;
-}
-
-const userLoggedIn = async () => {
-  chrome.storage.local.set({ logged_in: true });
-}
-
 
 
 /**
@@ -184,8 +180,8 @@ const resolveContentScript = async (request, sender) => {
       break;
 
     case "getTooltips":
-      const status = await getUserStatus();
-      const tooltips = await getTooltips(sender.url, status);
+      const user = await getUser();
+      const tooltips = await getTooltips(sender.url, user.status);
 
       sendMessageToContentScript(sender.tab.id, {
         respondTo: request.query,
@@ -201,36 +197,24 @@ const resolveContentScript = async (request, sender) => {
  */
 const resolvePopup = async (request) => {
   switch(request.query) {
-    case "isUserLoggedIn?":
-      var answer = await isUserLoggedIn();
+    case "getUser":
+      var answer = await getUser();
       sendMessageToPopup({
         respondTo: request.query,
         answer: answer
       });
       break;
 
-    case "getUsername":
-      var answer = await getUsername();
+    case "loginUser":
+      var answer = await loginUser(request.parameters.login, request.parameters.password);
       sendMessageToPopup({
         respondTo: request.query,
         answer: answer
       });
       break;
 
-    case "setUsername":
-      setUsername(request.parameters.username);
-      break;
-
-    case "getUserStatus":
-      var answer = await getUserStatus();
-      sendMessageToPopup({
-        respondTo: request.query,
-        answer: answer
-      });
-      break;
-
-    case "setUserStatus":
-      setUserStatus(request.parameters.status);
+    case "logoutUser":
+      logoutUser();
       break;
 
     case "isTooltips?site":
