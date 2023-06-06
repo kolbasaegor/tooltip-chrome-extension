@@ -126,6 +126,12 @@ const logoutUser = async () => {
   });
 }
 
+const registerUser = async (login, password) => {
+  const answer = await db.registerUser(login, password);
+
+  return answer;
+}
+
 const getUser = async () => {
   const user = await chrome.storage.local.get(["user"]);
 
@@ -197,6 +203,14 @@ const resolveContentScript = async (request, sender) => {
  */
 const resolvePopup = async (request) => {
   switch(request.query) {
+    case "registerUser":
+      var answer = await registerUser(request.parameters.login, request.parameters.password);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
     case "getUser":
       var answer = await getUser();
       sendMessageToPopup({

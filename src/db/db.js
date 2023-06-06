@@ -67,3 +67,28 @@ export const getUser = async (login, password) => {
         }
     }
 }
+
+export const registerUser = async (login, password) => {
+    const { data } = await _supabase
+    .from('user')
+    .select('id')
+    .eq('login', login)
+    .limit(1);
+
+    if (data.length > 0) return {
+        status: false,
+        error: "user already registered"
+    };
+
+    const { error } = await _supabase
+    .from('user')
+    .insert({
+        login: login,
+        password: password
+    })
+
+    return {
+        status: !error ? true : false,
+        error: error
+    }
+}

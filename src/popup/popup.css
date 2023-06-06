@@ -105,3 +105,18 @@ a:hover {
 .center {
   margin: auto;
 }
+
+.err {
+  text-align: center;
+  color: #ce1313;
+}
+
+.suc {
+  text-align: center;
+  color: #16c44a;
+}
+
+.submit-button {
+  cursor: pointer;
+}
+

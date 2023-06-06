@@ -32,7 +32,7 @@ const firstLine = async (status) => {
     "No tooltips on this site";
 
     statusElem.appendChild(statusTitle);
-    content.appendChild(statusElem);
+    control.appendChild(statusElem);
 
     const origin = await getOrigin();
     if (status) queryToService("isTooltipsEnabled?site", {url: origin});
@@ -84,7 +84,7 @@ const secondLine = async (status) => {
     "No tooltips on this page";
 
     statusElem.appendChild(statusTitle);
-    content.appendChild(statusElem);
+    control.appendChild(statusElem);
 
     const url = await getCurrentTabUrl();
     if (status) queryToService("isTooltipsEnabled?url", {url: url});
@@ -158,7 +158,7 @@ const createLoginForm = async () => {
     loginForm.id = "login-form";
     loginForm.className = "entry";
     loginForm.hidden = true;
-    loginForm.onsubmit = () => {
+    loginForm.onsubmit = async () => {
         queryToService("loginUser", {
             login: loginField.value,
             password: passwordField.value
@@ -179,6 +179,7 @@ const createLoginForm = async () => {
     passwordField.placeholder = "password";
 
     const submitButton = document.createElement("input");
+    submitButton.className = "submit-button";
     submitButton.type = "submit";
     submitButton.value = "login";
 
@@ -187,22 +188,45 @@ const createLoginForm = async () => {
     loginForm.appendChild(passwordField);
     loginForm.appendChild(submitButton);
 
-    setTimeout(() => {
-        content.appendChild(loginForm);
-    }, "1000");
+    content.appendChild(loginForm);
 }
 
 const createRegisterForm = async () => {
-    const registerFrom = document.createElement("div");
-    registerFrom.id = "register-form";
-    registerFrom.className = "entry";
-    registerFrom.hidden = true;
+    const registerForm = document.createElement("form");
+    registerForm.id = "register-form";
+    registerForm.className = "entry";
+    registerForm.hidden = true;
+    registerForm.onsubmit = async () => {
+        queryToService("registerUser", {
+            login: loginField.value,
+            password: passwordField.value
+        });
+    }
 
-    registerFrom.textContent = "Register Form:";
+    const title = document.createElement("p");
+    title.textContent = "Register form";
 
-    setTimeout(() => {
-        content.appendChild(registerFrom);
-    }, "1000");
+    const loginField = document.createElement("input");
+    loginField.type = "text";
+    loginField.required = true;
+    loginField.placeholder = "login";
+
+    const passwordField = document.createElement("input");
+    passwordField.type = "password";
+    passwordField.required = true;
+    passwordField.placeholder = "password";
+
+    const submitButton = document.createElement("input");
+    submitButton.className = "submit-button";
+    submitButton.type = "submit";
+    submitButton.value = "register";
+
+    registerForm.appendChild(title);
+    registerForm.appendChild(loginField);
+    registerForm.appendChild(passwordField);
+    registerForm.appendChild(submitButton);
+
+    content.appendChild(registerForm);
 }
 
 const showUserAndStatus = (isLoggedIn, _status, login) => {
@@ -258,14 +282,52 @@ const queryToService = async (query, parameters={}) => {
   });
 }
 
+const displayMessage = (type, text) => {
+    const elem = document.querySelector(element);
+    elem.textContent = text;
+    elem.className = type;
+    elem.hidden = false;
+}
+
+const createInfoMessage = () => {
+    const infoMessage = document.createElement("p");
+    infoMessage.id = "info-message";
+    infoMessage.hidden = true;
+
+    content.appendChild(infoMessage);
+}
+
+const showInfo = (type, text) => {
+    const infoMessage = document.querySelector("#info-message");
+    infoMessage.className = type;
+    infoMessage.textContent = text;
+    infoMessage.hidden = false;
+}
+
 /**
  * processes responses from service-worker.js
  * @param {JSON} response response from service-worker.js
  */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
+    case "registerUser":
+        if (response.msg.answer.status) {
+            hideRegisterForm();
+            showLoginForm();
+            showInfo("suc", "You have successfully registered, now you can login");
+        } else {
+            showRegisterForm();
+            showInfo("err", response.msg.answer.error);
+        }
+        break;
+
     case "loginUser":
-        if (response.msg.answer) location.reload();
+        if (response.msg.answer) {
+            location.reload();
+        } else {
+            showLoginForm();
+            showInfo("err", "Incorrect login or password");
+        }
         break;
 
     case "getUser":
@@ -319,13 +381,16 @@ chrome.runtime.onMessage.addListener(async (request) => {
  * entry point
  */
 const main = async () => {
+    const origin = await getOrigin();
+    queryToService("isTooltips?site", {url: origin});
     queryToService("getUser");
+
     createLoginForm();
     createRegisterForm();
-
-    const origin = await getOrigin();
-    queryToService("isTooltips?site", {url: origin});;
+    createInfoMessage();
 }
 
-const content = document.querySelector(".content"); // global variable
+const content = document.querySelector(".content");
+const control = document.createElement("div");
+content.appendChild(control);
 main(); // <-- entry point is here
