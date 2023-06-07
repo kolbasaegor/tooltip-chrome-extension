@@ -183,9 +183,12 @@ const createLoginForm = async () => {
     submitButton.type = "submit";
     submitButton.value = "login";
 
+    const empty = document.createElement("div");
+
     loginForm.appendChild(title);
     loginForm.appendChild(loginField);
     loginForm.appendChild(passwordField);
+    loginForm.appendChild(empty);
     loginForm.appendChild(submitButton);
 
     content.appendChild(loginForm);
@@ -221,9 +224,12 @@ const createRegisterForm = async () => {
     submitButton.type = "submit";
     submitButton.value = "register";
 
+    const empty = document.createElement("div");
+
     registerForm.appendChild(title);
     registerForm.appendChild(loginField);
     registerForm.appendChild(passwordField);
+    registerForm.appendChild(empty);
     registerForm.appendChild(submitButton);
 
     content.appendChild(registerForm);
@@ -312,7 +318,6 @@ const resolveService = async (response) => {
   switch(response.msg.respondTo) {
     case "registerUser":
         if (response.msg.answer.status) {
-            hideRegisterForm();
             showLoginForm();
             showInfo("suc", "You have successfully registered, now you can login");
         } else {

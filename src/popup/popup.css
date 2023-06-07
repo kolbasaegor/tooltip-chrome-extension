@@ -102,10 +102,6 @@ a:hover {
   flex-direction: column;
 }
 
-.center {
-  margin: auto;
-}
-
 .err {
   text-align: center;
   color: #ce1313;

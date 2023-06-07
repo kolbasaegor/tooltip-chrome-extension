@@ -1,6 +1,6 @@
 import { _supabase } from "./supabase.js";
 
-export const isTooltipsDomain = async (url) => {
+export const isTooltipsDomainDB = async (url) => {
     const { data, error } = await _supabase
     .from('available_domain')
     .select('id')
@@ -10,7 +10,7 @@ export const isTooltipsDomain = async (url) => {
     return data.length == 1 ? true : false;
 }
 
-export const isTooltipsUrl = async (url) => {
+export const isTooltipsUrlDB = async (url) => {
     const { data, error } = await _supabase
     .from('available_url')
     .select('id')
@@ -20,7 +20,7 @@ export const isTooltipsUrl = async (url) => {
     return data.length == 1 ? true : false;
 }
 
-export const getTooltips = async (url, type) => {
+export const getTooltipsDB = async (url, type) => {
     const { data, error } = await _supabase
     .from('available_url')
     .select(`tooltip_set ( options, steps, type )`)
@@ -48,7 +48,7 @@ const getRole = async (login) => {
     return data[0].role;
 }
 
-export const getUser = async (login, password) => {
+export const getUserDB = async (login, password) => {
     const { data, error } = await _supabase
     .from('user')
     .select('login')
@@ -68,7 +68,7 @@ export const getUser = async (login, password) => {
     }
 }
 
-export const registerUser = async (login, password) => {
+export const registerUserDB = async (login, password) => {
     const { data } = await _supabase
     .from('user')
     .select('id')
