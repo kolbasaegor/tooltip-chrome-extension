@@ -1,15 +1,47 @@
-const initialMessage = {
-  title: `<strong>Ну и дела...</strong>`,
-  text: `
-  На данной странице доступны подсказки, для продолжения 
-  нажмите <strong>"Поехали!"</strong>. <br>
-  Для отключения подсказок на этой странице нажмите на 
-  <input type="checkbox" style="cursor: pointer" checked> 
-  в оконке расширения или нажмите кнопку <strong>"Ни за что"</strong>. 
-  Вы всегда можете вновь включить подсказки в расширении.
-  `,
-  yesBtn: "Поехали!",
-  noBtn: "Ни за что"
+const generateButtons = (tooltips) => {
+  var buttons = [];
+
+  buttons.push({
+    action() {
+      queryToService("disableTooltipsUrl");
+      return this.complete();
+    },
+    classes: 'shepherd-button-secondary',
+    text: "Disable"
+  });
+
+  for (let set of tooltips) {
+    buttons.push({
+      action() {
+        runMainTour(set.options, set.steps.arr);
+        return this.complete();
+      },
+      classes: 'shepherd-button-secondary',
+      text: `<div style="color: ${set.role.color};">${set.role.role}</div>`
+    });
+  }
+
+  return buttons;
+}
+
+const showWelcomeMessage = (tooltips) => {
+  const welcomeTour = new Shepherd.Tour({
+    useModalOverlay: true,
+    defaultStepOptions: {
+      cancelIcon: { enabled: true }
+    }
+  });
+
+  welcomeTour.addStep({
+    title: "This page contains tooltips",
+    text: `Below are the buttons that correspond to your roles. 
+    Each of them has different tooltips. If you want to disable 
+    tooltips for this page, click the "disable" button. You can 
+    always turn it back on or off in the extension window.`,
+    buttons: generateButtons(tooltips)
+  });
+
+  welcomeTour.start();
 }
 
 /**
@@ -51,42 +83,12 @@ const createTour = (options) => {
 }
 
 /**
- * Adds first step to the tour
- * @param {Shepherd.Tour} tour Shepherd.Tour object
- * @param {JSON} options tooltip information
- */
-const addInitialStep = (tour) => {
-  tour.addStep({
-    title: initialMessage.title,
-    text: initialMessage.text,
-    buttons: [
-      {
-        action() {
-          queryToService("disableTooltipsUrl");
-          return this.complete();
-        },
-        classes: 'shepherd-button-secondary',
-        text: initialMessage.noBtn
-      },
-      {
-        action() {
-          return this.next();
-        },
-        text: initialMessage.yesBtn
-      }
-    ],
-  });
-}
-
-/**
  * Adds steps to the tour
  * @param {Shepherd.Tour} tour Shepherd.Tour object 
  * @param {[JSON]} steps array of steps
  * @param {JSON} options tooltip information
  */
 const addSteps = (tour, steps) => {
-  addInitialStep(tour);
-
   for (let i = 0; i < steps.length; i++) {
     let step = steps[i];
     tour.addStep({
@@ -115,18 +117,13 @@ const addSteps = (tour, steps) => {
   }
 }
 
-/**
- * creates and runs tour on the page
- * @param {JSON} data options and steps of the tour
- */
-const runTour = async (data) => {
-  includeCss("css/shepherd.css");
 
-  tour = createTour(data.options);
+const runMainTour = async (options, steps) => {
+  tour = createTour(options);
   tour.on('complete', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  addSteps(tour, data.steps);
+  addSteps(tour, steps);
 
   tour.start();
 }
@@ -158,11 +155,12 @@ const resolveService = async (response) => {
       break;
 
     case "isTooltipsEnabled?url":
-      if (response.msg.answer) queryToService("getTooltips");
+      if (response.msg.answer) queryToService("getTooltipSets");
       break;
 
-    case "getTooltips":
-      runTour(response.msg.answer);
+    case "getTooltipSets":
+      includeCss("css/shepherd.css");
+      showWelcomeMessage(response.msg.answer);
       break;
   }
 }

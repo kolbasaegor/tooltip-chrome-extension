@@ -6,6 +6,7 @@ const resolveService = async (response) => {
   switch(response.msg.respondTo) {
     case "registerUser":
         if (response.msg.answer.status) {
+            hideRegisterForm();
             showLoginForm();
             showInfo("suc", "You have successfully registered, now you can login");
         } else {
@@ -17,6 +18,7 @@ const resolveService = async (response) => {
     case "loginUser":
         if (response.msg.answer) {
             location.reload();
+            showInfo("suc", "You have successfully logged in!");
         } else {
             showLoginForm();
             showInfo("err", "Incorrect login or password");
@@ -24,9 +26,10 @@ const resolveService = async (response) => {
         break;
 
     case "getUser":
+        console.log(response);
         showUserAndStatus(
             response.msg.answer.isLoggedIn,
-            response.msg.answer.status,
+            response.msg.answer.roles,
             response.msg.answer.login
         );
 

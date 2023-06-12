@@ -20,75 +20,64 @@ export const isTooltipsUrlDB = async (url) => {
     return data.length == 1 ? true : false;
 }
 
-export const getTooltipsDB = async (url, type) => {
+export const getTooltipSetsDB = async (url, roles) => {
     const { data, error } = await _supabase
-    .from('available_url')
-    .select(`tooltip_set ( options, steps, type )`)
-    .eq('url', url);
+    .from('tooltip_set')
+    .select(`options, steps, available_url ( url ), role ( role, color )`)
+    .eq('available_url.url', url);
 
-    if (data.length == 0) return null;
-
-    const sets = data[0].tooltip_set;
-    for (const set of sets) {
-        if (set.type == type) return set;
-    }
-
-    return sets.find(set => set.type == "default");
+    return data.filter(set => roles.includes(set.role.role));
 }
 
-const getRole = async (login) => {
-    const { data, error } = await _supabase
-    .from('role')
-    .select('role')
-    .eq('login', login)
-    .limit(1);
-
-    if (data.length == 0) return "default";
-
-    return data[0].role;
-}
 
 export const getUserDB = async (login, password) => {
     const { data, error } = await _supabase
     .from('user')
-    .select('login')
+    .select(`login, role ( role, color )`)
     .eq('login', login)
     .eq('password', password)
     .limit(1);
-    
+
     if (data.length == 0) return null;
 
-    const role = await getRole(login);
     return {
         user: {
             isLoggedIn: true,
-            login: login,
-            status: role
+            login: data[0].login,
+            roles: data[0].role
         }
     }
 }
 
+const addDefaultRoleToUser = async (user_id) => {
+    await _supabase
+    .from('users_roles')
+    .insert([{
+        user_id: user_id,
+        role_id: 1
+    }])
+} 
+
 export const registerUserDB = async (login, password) => {
-    const { data } = await _supabase
+    const { data, error } = await _supabase
     .from('user')
-    .select('id')
-    .eq('login', login)
-    .limit(1);
-
-    if (data.length > 0) return {
-        status: false,
-        error: "user already registered"
-    };
-
-    const { error } = await _supabase
-    .from('user')
-    .insert({
+    .insert([{
         login: login,
         password: password
-    })
+    }])
+    .select('*');
+
+    if ( error ) {
+        return {
+            status: false,
+            error: error.details
+        };
+    }
+
+    addDefaultRoleToUser(data[0].id);
 
     return {
-        status: !error ? true : false,
-        error: error
+        status: true,
+        error: null
     }
 }

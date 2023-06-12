@@ -1,7 +1,8 @@
-import { isTooltipsEnabled, isTooltipsExist, getTooltips } from "./service/tooltip_helper.js";
+import { isTooltipsEnabled, isTooltipsExist, getTooltipSets } from "./service/tooltip_helper.js";
 import { sendMessageToContentScript, sendMessageToPopup } from "./service/messaging.js";
 import { loginUser, logoutUser, registerUser, getUser } from "./service/auth.js";
 import { setCookie } from "./service/cookie.js";
+import { pullRoles } from "./service/other.js";
 
 /**
  * processes requests from content-script.js
@@ -37,9 +38,10 @@ const resolveContentScript = async (request, sender) => {
       setCookie(sender.url, "tooltips_enabled_url", "0");
       break;
 
-    case "getTooltips":
+    case "getTooltipSets":
       const user = await getUser();
-      const tooltips = await getTooltips(sender.url, user.status);
+      const roles = await pullRoles(user.roles);
+      const tooltips = await getTooltipSets(sender.url, roles);
 
       sendMessageToContentScript(sender.tab.id, {
         respondTo: request.query,
@@ -137,10 +139,11 @@ const resolve = (request, sender) => {
   if (request.from === "popup") resolvePopup(request);
 }
 
-
 /**
  * Listens to messages from popup.js and content-script.js and respond to them
  */
 chrome.runtime.onMessage.addListener(
   async (request, sender) => { resolve(request, sender); }
 );
+
+// chrome.storage.local.clear();

@@ -1,4 +1,4 @@
-import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipsDB } from "../db/db.js";
+import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipSetsDB } from "../db/db.js";
 import { getCookie } from "./cookie.js";
 
 /**
@@ -30,11 +30,8 @@ export const isTooltipsEnabled = async (on, url) => {
  * @param {string} url 
  * @returns JSON tooltips for given url
  */
-export const getTooltips = async (url, type) => {
-  const data = await getTooltipsDB(url, type);
+export const getTooltipSets = async (url, roles) => {
+  const data = await getTooltipSetsDB(url, roles);
 
-  return {
-    options: data.options,
-    steps: data.steps.arr
-  };
+  return data;
 }

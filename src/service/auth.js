@@ -7,6 +7,8 @@ const isEmptyObject = (obj) => {
 export const loginUser = async (login, password) => {
   const user = await getUserDB(login, password);
 
+  console.log(user);
+
   if (!user) return false;
 
   chrome.storage.local.set(user);
@@ -18,7 +20,12 @@ export const logoutUser = async () => {
     user: {
       isLoggedIn: false,
       login: null,
-      status: "default"
+      roles: [
+        {
+          role: "default",
+          color: '#6b6b6b'
+        }
+      ]
     }
   });
 }
@@ -37,7 +44,12 @@ export const getUser = async () => {
       user: {
         isLoggedIn: false,
         login: null,
-        status: "default"
+        roles: [
+          {
+            role: "default",
+            color: '#6b6b6b'
+          }
+        ]
       }
     };
     chrome.storage.local.set(newUser);

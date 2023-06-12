@@ -80,23 +80,22 @@ const createRegisterForm = async () => {
     content.appendChild(registerForm);
 }
 
-const showUserAndStatus = (isLoggedIn, _status, login) => {
+const showUserAndStatus = (isLoggedIn, roles, login) => {
     const header = document.querySelector(".header");
-
-    const container = document.createElement("div");
-    container.className = "container";
 
     const username = document.createElement("p");
     username.className = "username";
     username.textContent = isLoggedIn ? login : "unauthorized";
+    header.appendChild(username);
 
-    const status = document.createElement("p");
-    status.className = "status";
-    status.textContent = _status;
+    for (let role of roles) {
+        let roleElem = document.createElement("div");
+        roleElem.className = "role";
+        roleElem.style.backgroundColor = role.color;
+        roleElem.textContent = role.role;
 
-    container.appendChild(username);
-    container.appendChild(status);
-    header.appendChild(container);
+        header.appendChild(roleElem);
+    }
 }
 
 const showRegisterForm = () => {
