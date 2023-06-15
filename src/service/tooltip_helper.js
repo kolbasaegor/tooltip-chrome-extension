@@ -1,5 +1,5 @@
 import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipSetsDB } from "../db/db.js";
-import { getCookie } from "./cookie.js";
+import { getCookie, setCookie } from "./cookie.js";
 
 /**
  * checks if there are tooltips for the given url
@@ -19,8 +19,23 @@ export const isTooltipsExist = async (on, url) => {
  * @returns boolean
  */
 export const isTooltipsEnabled = async (on, url) => {
-  const cookieName = on === "site" ? "tooltips_enabled_site" : "tooltips_enabled_url";
-  const cookie = await getCookie(url, cookieName);
+  if (on === "site") {
+    const cookie = await getCookie(url, "tooltips_site");
+
+    if (!cookie) {
+      setCookie(url, "tooltips_site", "1");
+      return true;
+    }
+
+    return cookie.value === "1" ? true : false;
+  }
+
+  const cookie = await getCookie(url, `tooltips_${url}`);
+
+  if (!cookie) {
+    setCookie(url, `tooltips_${url}`, "1");
+    return true;
+  }
 
   return cookie.value === "1" ? true : false;
 }

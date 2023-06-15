@@ -23,10 +23,11 @@ export const isTooltipsUrlDB = async (url) => {
 export const getTooltipSetsDB = async (url, roles) => {
     const { data, error } = await _supabase
     .from('tooltip_set')
-    .select(`options, steps, available_url ( url ), role ( role, color )`)
-    .eq('available_url.url', url);
+    .select(`options, steps, available_url!inner ( url ), role!inner ( role, color )`)
+    .eq('available_url.url', url)
+    .in('role.role', roles);
 
-    return data.filter(set => roles.includes(set.role.role));
+    return data;
 }
 
 

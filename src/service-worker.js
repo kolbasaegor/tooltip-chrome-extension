@@ -35,7 +35,7 @@ const resolveContentScript = async (request, sender) => {
       break;
 
     case "disableTooltipsUrl":
-      setCookie(sender.url, "tooltips_enabled_url", "0");
+      setCookie(sender.url, `tooltips_${sender.url}`, "0");
       break;
 
     case "getTooltipSets":
@@ -118,11 +118,11 @@ const resolvePopup = async (request) => {
       break;
 
     case "setCookieUrl":
-      setCookie(request.parameters.url, "tooltips_enabled_url", request.parameters.value);
+      setCookie(request.parameters.url, `tooltips_${request.parameters.url}`, request.parameters.value);
       break;
 
     case "setCookieSite":
-      setCookie(request.parameters.url, "tooltips_enabled_site", request.parameters.value);
+      setCookie(request.parameters.url, "tooltips_site", request.parameters.value);
       break;
   }
 }

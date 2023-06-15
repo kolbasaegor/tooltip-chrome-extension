@@ -26,7 +26,6 @@ const resolveService = async (response) => {
         break;
 
     case "getUser":
-        console.log(response);
         showUserAndStatus(
             response.msg.answer.isLoggedIn,
             response.msg.answer.roles,

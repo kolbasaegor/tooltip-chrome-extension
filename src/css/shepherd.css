@@ -4,6 +4,7 @@
     border-radius: 3px;
     color: hsla(0, 0%, 100%, .75);
     cursor: pointer;
+    margin-top: .5rem;
     margin-right: .5rem;
     padding: .5rem 1.5rem;
     transition: all .5s ease
@@ -31,7 +32,7 @@
 .shepherd-footer {
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    display: flex;
+    /* display: flex; */
     justify-content: flex-end;
     padding: 0 .75rem .75rem
 }

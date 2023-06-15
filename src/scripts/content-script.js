@@ -1,15 +1,6 @@
 const generateButtons = (tooltips) => {
   var buttons = [];
 
-  buttons.push({
-    action() {
-      queryToService("disableTooltipsUrl");
-      return this.complete();
-    },
-    classes: 'shepherd-button-secondary',
-    text: "Disable"
-  });
-
   for (let set of tooltips) {
     buttons.push({
       action() {
@@ -21,10 +12,21 @@ const generateButtons = (tooltips) => {
     });
   }
 
+  buttons.push({
+    action() {
+      queryToService("disableTooltipsUrl");
+      return this.complete();
+    },
+    classes: 'shepherd-button-secondary',
+    text: "Disable"
+  });
+
   return buttons;
 }
 
 const showWelcomeMessage = (tooltips) => {
+  if (tooltips.length === 0) return;
+
   const welcomeTour = new Shepherd.Tour({
     useModalOverlay: true,
     defaultStepOptions: {

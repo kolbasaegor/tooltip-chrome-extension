@@ -7,20 +7,10 @@
  * @param {string} defaultValue 
  * @returns cookie
  */
-export const getCookie = async (url, name, defaultValue="1") => {
+export const getCookie = async (url, name) => {
   const cookie = await chrome.cookies.get({ url: url, name: name });
 
-  if (!cookie) {
-    const newCookie = await chrome.cookies.set({
-      url: url, 
-      name: name, 
-      expirationDate: (new Date().getTime() / 1000) + 60*60*24*30,
-      value: defaultValue
-    });
-    return newCookie;
-  } else {
-    return cookie;
-  }
+  return cookie;
 }
 
 /**
