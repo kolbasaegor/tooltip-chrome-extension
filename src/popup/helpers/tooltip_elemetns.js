@@ -86,8 +86,11 @@ const secondLineCheckbox = async (status) => {
     const statusElem = document.querySelector("#url-has-tooltips");
     statusElem.appendChild(checkbox);
 
+    const showTooltipsBtn = getShowTooltipsButton();
+
     checkbox.addEventListener('change', async (event) => {
         const status = event.target.checked;
+        showTooltipsBtn.hidden = !status;
         const url = await getCurrentTabUrl();
 
         queryToService("setCookieUrl", {
@@ -95,4 +98,26 @@ const secondLineCheckbox = async (status) => {
             value: status ? "1" : "0"
         });
     });
+
+    if (status) showTooltipsBtn.hidden = false;
+}
+
+const getShowTooltipsButton = () => {
+    const title = document.createElement("a");
+    title.href = "#";
+    title.textContent = "->SHOW<-";
+
+    title.addEventListener('click', async () => {
+        queryToContentScript("showTooltips");
+    })
+
+    const showTooltipsBtn = document.createElement("div");
+    showTooltipsBtn.className = "entry";
+    showTooltipsBtn.style.textAlign = "center";
+    showTooltipsBtn.hidden = true;
+    showTooltipsBtn.appendChild(title);
+
+    control.appendChild(showTooltipsBtn);
+
+    return showTooltipsBtn;
 }

@@ -4,6 +4,7 @@ const generateButtons = (tooltips) => {
   for (let set of tooltips) {
     buttons.push({
       action() {
+        TOUR_IS_RUNNGING = false;
         runMainTour(set.options, set.steps.arr);
         return this.complete();
       },
@@ -14,6 +15,7 @@ const generateButtons = (tooltips) => {
 
   buttons.push({
     action() {
+      TOUR_IS_RUNNGING = false;
       queryToService("disableTooltipsUrl");
       return this.complete();
     },
@@ -26,12 +28,17 @@ const generateButtons = (tooltips) => {
 
 const showWelcomeMessage = (tooltips) => {
   if (tooltips.length === 0) return;
+  if (TOUR_IS_RUNNGING) return;
 
   const welcomeTour = new Shepherd.Tour({
     useModalOverlay: true,
     defaultStepOptions: {
       cancelIcon: { enabled: true }
     }
+  });
+
+  welcomeTour.on('cancel', () => {
+    TOUR_IS_RUNNGING = false;
   });
 
   welcomeTour.addStep({
@@ -43,6 +50,7 @@ const showWelcomeMessage = (tooltips) => {
     buttons: generateButtons(tooltips)
   });
 
+  TOUR_IS_RUNNGING = true;
   welcomeTour.start();
 }
 
@@ -124,9 +132,14 @@ const runMainTour = async (options, steps) => {
   tour = createTour(options);
   tour.on('complete', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    TOUR_IS_RUNNGING = false;
+  });
+  tour.on('cancel', () => {
+    TOUR_IS_RUNNGING = false;
   });
   addSteps(tour, steps);
 
+  TOUR_IS_RUNNGING = true;
   tour.start();
 }
 
@@ -161,8 +174,17 @@ const resolveService = async (response) => {
       break;
 
     case "getTooltipSets":
+      TOOLTIPS = response.msg.answer;
       includeCss("css/shepherd.css");
-      showWelcomeMessage(response.msg.answer);
+      showWelcomeMessage(TOOLTIPS);
+      break;
+  }
+}
+
+const resolvePopup = async (request) => {
+  switch(request.query) {
+    case "showTooltips":
+      showWelcomeMessage(TOOLTIPS);
       break;
   }
 }
@@ -175,6 +197,7 @@ const resolve = (request) => {
   if (request.dest != "content-script") return;
 
   if (request.from === "service") resolveService(request);
+  if (request.from === "popup") resolvePopup(request);
 }
 
 /**
@@ -184,6 +207,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
   resolve(request);
 })
 
+TOUR_IS_RUNNGING = false;
 queryToService("isTooltips?url"); // <-- entry point is here
 
 
