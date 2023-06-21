@@ -1,4 +1,4 @@
-import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipSetsDB } from "../db/db.js";
+import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipSetsDB, insertTooltipSetDB } from "../db/db.js";
 import { getCookie, setCookie } from "./cookie.js";
 
 /**
@@ -49,4 +49,16 @@ export const getTooltipSets = async (url, roles) => {
   const data = await getTooltipSetsDB(url, roles);
 
   return data;
+}
+
+export const addTooltipSet = async (parameters) => {
+  const answer = await insertTooltipSetDB(
+    parameters.origin,
+    parameters.url,
+    parameters.role,
+    parameters.options,
+    parameters.steps
+    );
+
+  return answer;
 }

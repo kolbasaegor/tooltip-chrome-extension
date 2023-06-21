@@ -1,8 +1,8 @@
-import { isTooltipsEnabled, isTooltipsExist, getTooltipSets } from "./service/tooltip_helper.js";
-import { sendMessageToContentScript, sendMessageToPopup } from "./service/messaging.js";
+import { isTooltipsEnabled, isTooltipsExist, getTooltipSets, addTooltipSet } from "./service/tooltip_helper.js";
+import { sendMessageToContentScript, sendMessageToPopup, sendMessageToCT } from "./service/messaging.js";
 import { loginUser, logoutUser, registerUser, getUser } from "./service/auth.js";
 import { setCookie } from "./service/cookie.js";
-import { pullRoles } from "./service/other.js";
+import { pullRoles, getAvailableRoles } from "./service/other.js";
 
 /**
  * processes requests from content-script.js
@@ -127,6 +127,26 @@ const resolvePopup = async (request) => {
   }
 }
 
+const resolveCT = async (request) => {
+  switch(request.query) {
+    case "getAvailableRoles":
+      var answer = await getAvailableRoles(request.parameters.url);
+      sendMessageToCT({
+        respondTo: request.query,
+        answer: answer
+      })
+      break;
+
+    case "addTooltipSet":
+      var answer = await addTooltipSet(request.parameters);
+      sendMessageToCT({
+        respondTo: request.query,
+        answer: answer
+      })
+      break;
+  }
+}
+
 /**
  * processes responses from other components
  * @param {JSON} request request from other components
@@ -137,6 +157,7 @@ const resolve = (request, sender) => {
 
   if (request.from === "content-script") resolveContentScript(request, sender);
   if (request.from === "popup") resolvePopup(request);
+  if (request.from === "create_tooltips") resolveCT(request);
 }
 
 /**

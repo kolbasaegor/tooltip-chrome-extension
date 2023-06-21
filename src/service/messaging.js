@@ -22,3 +22,11 @@ export const sendMessageToPopup = (message) => {
     msg: message
   });
 }
+
+export const sendMessageToCT = (message) => {
+  chrome.runtime.sendMessage({
+    dest: "create_tooltips",
+    from: "service",
+    msg: message
+  });
+}

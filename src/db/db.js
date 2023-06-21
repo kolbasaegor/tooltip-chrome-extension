@@ -82,3 +82,70 @@ export const registerUserDB = async (login, password) => {
         error: null
     }
 }
+
+export const getAvailableRolesDB = async (url) => {
+    const unavailable_roles = await _supabase
+    .from('tooltip_set')
+    .select('available_url!inner ( url ), role!inner ( role )')
+    .eq('available_url.url', url);
+
+    const unavailable_roles_array = unavailable_roles.data.map(x => x.role.role);
+
+    const roles = await _supabase
+    .from('role')
+    .select('id, role, color');
+
+    const available_roles = roles.data.filter(x => !unavailable_roles_array.includes(x.role));
+    
+    return available_roles;
+}
+
+const getAvailableDomain = async (origin) => {
+    var availableDomain = await _supabase
+    .from('available_domain')
+    .select('id')
+    .eq('url', origin)
+    .limit(1);
+
+    if (availableDomain.data.length === 0) {
+        var availableDomain = await _supabase
+        .from('available_domain')
+        .insert({url: origin})
+        .select('id');
+    } 
+
+    return availableDomain;
+}
+
+const getAvailableUrl = async (url, domainId) => {
+    var availableUrl = await _supabase
+    .from('available_url')
+    .select('id, domain_id')
+    .eq('url', url)
+    .limit(1);
+
+    if (availableUrl.data.length === 0) {
+        var availableUrl = await _supabase
+        .from('available_url')
+        .insert({ url: url, domain_id: domainId })
+        .select('id');
+    }
+
+    return availableUrl;
+}
+
+export const insertTooltipSetDB = async (origin, url, role, options, steps) => {
+    const availableDomain = await getAvailableDomain(origin);
+    const availableUrl = await getAvailableUrl(url, availableDomain.data[0].id);
+
+    const { error } = await _supabase
+    .from('tooltip_set')
+    .insert({
+        url_id: availableUrl.data[0].id,
+        role_id: role,
+        options: options,
+        steps: steps
+    });
+
+    return error ? false : true;
+}

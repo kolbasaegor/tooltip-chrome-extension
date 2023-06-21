@@ -184,7 +184,8 @@ const resolveService = async (response) => {
 const resolvePopup = async (request) => {
   switch(request.query) {
     case "showTooltips":
-      showWelcomeMessage(TOOLTIPS);
+      if (TOOLTIPS) { showWelcomeMessage(TOOLTIPS); }
+      else { queryToService("getTooltipSets"); }
       break;
   }
 }
@@ -208,6 +209,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
 })
 
 TOUR_IS_RUNNGING = false;
+TOOLTIPS = null;
 queryToService("isTooltips?url"); // <-- entry point is here
 
 

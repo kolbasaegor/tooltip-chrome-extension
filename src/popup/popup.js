@@ -17,8 +17,7 @@ const resolveService = async (response) => {
 
     case "loginUser":
         if (response.msg.answer) {
-            location.reload();
-            showInfo("suc", "You have successfully logged in!");
+            showInfo("suc", "You have successfully logged in! Refresh page");
         } else {
             showLoginForm();
             showInfo("err", "Incorrect login or password");
