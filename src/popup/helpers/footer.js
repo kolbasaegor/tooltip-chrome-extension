@@ -28,7 +28,7 @@ const addCreateTooltipsBtn = (footer) => {
     createTooltipSetButton.textContent = "[create tooltip set]";
     createTooltipSetButton.onclick = async () => {
         const status = await openCreateTooltipsPage();
-        if (!status) alert("Страница для создания подсказок уже открыта!");
+        if (!status) showInfo("err", "Страница для создания подсказок уже открыта!");
     }
     footer.appendChild(createTooltipSetButton);
 }

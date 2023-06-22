@@ -3,6 +3,7 @@ const submitToDb = async (origin, url) => {
 
     if (!status) return false;
 
+    showLoadingGif();
     queryToService("addTooltipSet", {
         origin: origin,
         url: url,
@@ -32,7 +33,7 @@ const grabSteps = () => {
     const steps = document.getElementsByClassName("step");
 
     if (steps.length === 0) {
-        alert("Вы не добавили ни одного шага (нужен как минимум один)");
+        showInfo("err", "Вы не добавили ни одного шага (нужен как минимум один)", "#steps")
         return { status: false, arr: null };
     }
 
@@ -73,10 +74,28 @@ const grabRole = () => {
     }
     }
 
-    if (!selectedOption) alert("Выберите роль");
+    if (!selectedOption) showInfo("err", "Выберите роль", "#role-selection");
     
     return {
         status: selectedOption ? true : false,
         id: selectedOption
     };
+}
+
+const showInfo = (type, text, id) => {
+    const infoMessage = document.createElement("p");
+    infoMessage.className = `info-message ${type}`;
+    infoMessage
+    infoMessage.textContent = text;
+
+    const target = document.querySelector(id);
+    target.appendChild(infoMessage);
+    target.scrollIntoView({ behavior: 'smooth' });
+}
+
+const clearAllInfoMessages = () => {
+    const msgs = document.getElementsByClassName("info-message err");
+    for (let i = 0; i < msgs.length; i++) {
+        msgs[i].remove();
+    }
 }

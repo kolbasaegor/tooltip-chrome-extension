@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener(function(message) { 
+chrome.runtime.onMessage.addListener(async (message) => { 
     if (message.dest != "create_tooltips") return;
 
     switch (message.from) {
@@ -13,11 +13,11 @@ chrome.runtime.onMessage.addListener(function(message) {
                 const status = message.msg.answer;
                 hideLoadingGif();
 
-                if (!status) alert("Не получилось добавить набор подсказок((");
+                if (!status) showInfo("err", "Не удалось добавить набор подсказок", "#ct-form");
 
                 if (status) {
-                    alert("Набор подсказок успешно добавлен :)\nПосле нажатия на OK страница закроется");
-                    closeCurrentTab();
+                    warning(`Набор подсказок успешно добавлен! 
+                    Можете закрыть эту сраницу`);
                 }
             }
 
@@ -32,12 +32,6 @@ const queryToService = async (query, parameters={}) => {
     query: query,
     parameters: parameters
   });
-}
-
-const closeCurrentTab = () => {
-    chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
-        chrome.tabs.remove(tabs[0].id);
-    });
 }
 
 const makeTitle = (url, origin) => {
@@ -103,13 +97,13 @@ const createOptionsSelector = () => {
     options.appendChild(p);
 }
 
-const warning = () => {
+const warning = (text) => {
     const warning = document.createElement("div");
     warning.className = "overlay";
     const centeredText = document.createElement("div");
     centeredText.className = "centered-text";
     const warningText = document.createElement("h1");
-    warningText.textContent = "Нет доступных ролей, чтобы создать набор подсказок для этого сайта";
+    warningText.textContent = text;
 
     centeredText.appendChild(warningText);
     warning.appendChild(centeredText);
@@ -251,8 +245,8 @@ const submitButton = () => {
     submitBtn.className = "submit-button";
     submitBtn.value = "Submit";
     submitBtn.onclick = () => {
+        clearAllInfoMessages();
         submitToDb(ORIGIN, _URL);
-        showLoadingGif();
     } 
     
     document.querySelector("#ct-form").appendChild(submitBtn);
@@ -260,7 +254,7 @@ const submitButton = () => {
 
 const tooltipConstructor = (roles) => {
     if (roles.length === 0) {
-        warning();
+        warning("Для этого сайта нельзя сделать подсказку. Нет достпуных ролей");
         return;
     }
 

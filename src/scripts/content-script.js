@@ -33,7 +33,8 @@ const showWelcomeMessage = (tooltips) => {
   const welcomeTour = new Shepherd.Tour({
     useModalOverlay: true,
     defaultStepOptions: {
-      cancelIcon: { enabled: true }
+      cancelIcon: { enabled: true },
+      classes: 'custom-class'
     }
   });
 

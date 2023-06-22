@@ -72,7 +72,8 @@
     font-size: 1rem;
     font-weight: 400;
     margin: 0;
-    padding: 0
+    padding: 0;
+    overflow-wrap: break-word;
 }
 
 .shepherd-header {
@@ -82,7 +83,7 @@
     display: flex;
     justify-content: flex-end;
     line-height: 2em;
-    padding: .75rem .75rem 0
+    padding: .75rem .75rem 0;
 }
 
 .shepherd-has-title .shepherd-content .shepherd-header {
@@ -94,7 +95,8 @@
     color: rgba(0, 0, 0, .75);
     font-size: 1rem;
     line-height: 1.3em;
-    padding: .75em
+    padding: .75em;
+    overflow-wrap: break-word;
 }
 
 .shepherd-text p {
@@ -108,7 +110,7 @@
 .shepherd-content {
     border-radius: 5px;
     outline: none;
-    padding: 0
+    padding: 0;
 }
 
 .shepherd-element {
