@@ -1,10 +1,7 @@
-const displayMessage = (type, text) => {
-    const elem = document.querySelector(element);
-    elem.textContent = text;
-    elem.className = type;
-    elem.hidden = false;
-}
-
+/**
+ * Message for showing important info in popup.
+ * Initially is hidden
+ */
 const createInfoMessage = () => {
     const infoMessage = document.createElement("p");
     infoMessage.id = "info-message";
@@ -13,6 +10,11 @@ const createInfoMessage = () => {
     content.appendChild(infoMessage);
 }
 
+/**
+ * Shows info message
+ * @param {string} type err | suc
+ * @param {string} text displayed text
+ */
 const showInfo = (type, text) => {
     const infoMessage = document.querySelector("#info-message");
     infoMessage.className = type;
@@ -20,6 +22,10 @@ const showInfo = (type, text) => {
     infoMessage.hidden = false;
 }
 
+/**
+ * Opens new page
+ * @param {JSON} parameters url and origin of current page
+ */
 const openNewPage = (parameters) => {
     const newPageUrl = "../../create_tooltips_page/create_tooltips.html";
 
@@ -32,6 +38,10 @@ const openNewPage = (parameters) => {
     });
 }
 
+/**
+ * Checks if CreateTooltipsPage is open
+ * @returns boolean
+ */
 const isCreateTooltipsPageOpen = async () => {
     const tabs = await chrome.tabs.query({});
 
@@ -44,6 +54,10 @@ const isCreateTooltipsPageOpen = async () => {
     return false;
 }
 
+/**
+ * Opens CreateTooltipsPage
+ * @returns boolean
+ */
 const openCreateTooltipsPage = async () => {
     const isOpen = await isCreateTooltipsPageOpen();
     if (isOpen) return false;

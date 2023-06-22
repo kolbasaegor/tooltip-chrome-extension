@@ -102,6 +102,10 @@ const secondLineCheckbox = async (status) => {
     if (status) showTooltipsBtn.hidden = false;
 }
 
+/**
+ * Creates and returns button that show tooltips
+ * @returns ShowTooltipsButton
+ */
 const getShowTooltipsButton = () => {
     const title = document.createElement("a");
     title.href = "#";

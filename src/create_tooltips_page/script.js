@@ -3,27 +3,23 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
     switch (message.from) {
         case "popup":
-            titleNroles(message);
+            titleAndRoles(message);
             break;
 
         case "service":
             if (message.msg.respondTo === "getAvailableRoles") tooltipConstructor(message.msg.answer);
-
-            if (message.msg.respondTo === "addTooltipSet") {
-                const status = message.msg.answer;
-                hideLoadingGif();
-
-                if (!status) showInfo("err", "Не удалось добавить набор подсказок", "#ct-form");
-
-                if (status) {
-                    warning(`Набор подсказок успешно добавлен! 
-                    Можете закрыть эту сраницу`);
-                }
-            }
-
+            if (message.msg.respondTo === "addTooltipSet") respondToUser(message.msg.answer);
             break;
     }
 });
+
+const respondToUser = (status) => {
+    hideLoadingGif();
+
+    status ?
+    warning(`Набор подсказок успешно добавлен! Можете закрыть эту сраницу`) :
+    showInfo("err", "Не удалось добавить набор подсказок", "#ct-form");
+}
 
 const queryToService = async (query, parameters={}) => {
   chrome.runtime.sendMessage({
@@ -49,7 +45,7 @@ const makeTitle = (url, origin) => {
     title2.appendChild(href2);
 }
 
-const titleNroles = async (parameters) => {
+const titleAndRoles = async (parameters) => {
     _URL = parameters.url;
     ORIGIN = parameters.origin;
 
@@ -198,8 +194,6 @@ const textField = (parent) => {
     parent.appendChild(textArea);
 }
 
-
-
 const addStep = (parent) => {
     const step = document.createElement("div");
     step.className = "step";
@@ -275,10 +269,6 @@ const createLoadingGif = () => {
     document.querySelector("#ct-form").appendChild(loadingGif);
 }
 
-const showLoadingGif = () => {
-    document.querySelector(".loading-gif").hidden = false;
-}
+const showLoadingGif = () => { document.querySelector(".loading-gif").hidden = false; }
 
-const hideLoadingGif = () => {
-    document.querySelector(".loading-gif").hidden = true;
-}
+const hideLoadingGif = () => { document.querySelector(".loading-gif").hidden = true; }

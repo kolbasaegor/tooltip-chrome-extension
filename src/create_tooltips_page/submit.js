@@ -18,7 +18,6 @@ const validate = () => {
     const options = grabOptions();
     const steps = grabSteps();
 
-    
     if (!(role.status & options.status & steps.status)) return { status: false };
 
     return {
@@ -68,10 +67,10 @@ const grabRole = () => {
     var selectedOption = null;
     
     for (var i = 0; i < radios.length; i++) {
-    if (radios[i].checked) {
-        selectedOption = radios[i].value;
-        break;
-    }
+        if (radios[i].checked) {
+            selectedOption = radios[i].value;
+            break;
+        }
     }
 
     if (!selectedOption) showInfo("err", "Выберите роль", "#role-selection");

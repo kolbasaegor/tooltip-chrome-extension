@@ -1,3 +1,6 @@
+/**
+ * Creates Login form
+ */
 const createLoginForm = async () => {
     const loginForm = document.createElement("form");
     loginForm.id = "login-form";
@@ -39,6 +42,9 @@ const createLoginForm = async () => {
     content.appendChild(loginForm);
 }
 
+/**
+ * Creates Register form
+ */
 const createRegisterForm = async () => {
     const registerForm = document.createElement("form");
     registerForm.id = "register-form";
@@ -80,6 +86,9 @@ const createRegisterForm = async () => {
     content.appendChild(registerForm);
 }
 
+/**
+ * Shows user's login and user's roles
+ */
 const showUserAndStatus = (isLoggedIn, roles, login) => {
     const header = document.querySelector(".header");
 
@@ -98,22 +107,10 @@ const showUserAndStatus = (isLoggedIn, roles, login) => {
     }
 }
 
-const showRegisterForm = () => {
-    const registerFrom = document.querySelector("#register-form");
-    registerFrom.hidden = false;
-}
+const showRegisterForm = () => { document.querySelector("#register-form").hidden = false; }
 
-const hideRegisterForm = () => {
-    const registerFrom = document.querySelector("#register-form");
-    registerFrom.hidden = true;
-}
+const hideRegisterForm = () => { document.querySelector("#register-form").hidden = true; }
 
-const showLoginForm = () => {
-    const loginFrom = document.querySelector("#login-form");
-    loginFrom.hidden = false;
-}
+const showLoginForm = () => { document.querySelector("#login-form").hidden = false; }
 
-const hideLoginForm = () => {
-    const loginFrom = document.querySelector("#login-form");
-    loginFrom.hidden = true;
-}
+const hideLoginForm = () => { document.querySelector("#login-form").hidden = true; }

@@ -35,6 +35,11 @@ const queryToService = async (query, parameters={}) => {
   });
 }
 
+/**
+ * send a request to content-script.js
+ * @param {string} query 
+ * @param {JSON} parameters 
+ */
 const queryToContentScript = async (query, parameters={}) => {
   const id = await getCurrentTabId();
 

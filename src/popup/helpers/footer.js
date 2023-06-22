@@ -1,3 +1,6 @@
+/**
+ * Creates footer for unauthorized user
+ */
 const footer_not_logged = () => {
     const loginButton = document.createElement("a");
     loginButton.href = "#";
@@ -22,17 +25,9 @@ const footer_not_logged = () => {
     footer.appendChild(registerButton);
 }
 
-const addCreateTooltipsBtn = (footer) => {
-    const createTooltipSetButton = document.createElement("a");
-    createTooltipSetButton.href = "#";
-    createTooltipSetButton.textContent = "[create tooltip set]";
-    createTooltipSetButton.onclick = async () => {
-        const status = await openCreateTooltipsPage();
-        if (!status) showInfo("err", "Страница для создания подсказок уже открыта!");
-    }
-    footer.appendChild(createTooltipSetButton);
-}
-
+/**
+ * Creates footer for authorized user
+ */
 const footer_logged = async () => {
     const footer = document.querySelector(".footer");
 
@@ -49,4 +44,19 @@ const footer_logged = async () => {
     if (url.startsWith("https://") || url.startsWith("http://")) {
         addCreateTooltipsBtn(footer);
     }
+}
+
+/**
+ * Creates button which opens the CreateTooltipsPage
+ * @param {HTMLElement} footer 
+ */
+const addCreateTooltipsBtn = (footer) => {
+    const createTooltipSetButton = document.createElement("a");
+    createTooltipSetButton.href = "#";
+    createTooltipSetButton.textContent = "[create tooltip set]";
+    createTooltipSetButton.onclick = async () => {
+        const status = await openCreateTooltipsPage();
+        if (!status) showInfo("err", "Страница для создания подсказок уже открыта!");
+    }
+    footer.appendChild(createTooltipSetButton);
 }

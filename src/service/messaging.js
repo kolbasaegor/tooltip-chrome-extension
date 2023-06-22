@@ -23,6 +23,10 @@ export const sendMessageToPopup = (message) => {
   });
 }
 
+/**
+ * sends message to create_tooltips_page/script.js
+ * @param {JSON | boolean} message message to script.js
+ */
 export const sendMessageToCT = (message) => {
   chrome.runtime.sendMessage({
     dest: "create_tooltips",

@@ -1,4 +1,9 @@
-const generateButtons = (tooltips) => {
+/**
+ * Generates buttons with roles + disable button
+ * @param {JSON} tooltips set of tooltip sets with roles 
+ * @returns [buttons]
+ */
+const generateRoleButtons = (tooltips) => {
   var buttons = [];
 
   for (let set of tooltips) {
@@ -13,7 +18,17 @@ const generateButtons = (tooltips) => {
     });
   }
 
-  buttons.push({
+  buttons.push(disableButton());
+
+  return buttons;
+}
+
+/**
+ * Generates 'disable tooltips on this url' button
+ * @returns button
+ */
+const disableButton = () => {
+  return {
     action() {
       TOUR_IS_RUNNGING = false;
       queryToService("disableTooltipsUrl");
@@ -21,14 +36,16 @@ const generateButtons = (tooltips) => {
     },
     classes: 'shepherd-button-secondary',
     text: "Disable"
-  });
-
-  return buttons;
+  }
 }
 
+/**
+ * A hint that informs that there are tooltips on this url.
+ * You can choose for which role tooltips will be shown
+ * @param {JSON} tooltips set of tooltip sets with roles
+ */
 const showWelcomeMessage = (tooltips) => {
-  if (tooltips.length === 0) return;
-  if (TOUR_IS_RUNNGING) return;
+  if (tooltips.length === 0 || TOUR_IS_RUNNGING) return;
 
   const welcomeTour = new Shepherd.Tour({
     useModalOverlay: true,
@@ -48,7 +65,7 @@ const showWelcomeMessage = (tooltips) => {
     Each of them has different tooltips. If you want to disable 
     tooltips for this page, click the "disable" button. You can 
     always turn it back on or off in the extension window.`,
-    buttons: generateButtons(tooltips)
+    buttons: generateRoleButtons(tooltips)
   });
 
   TOUR_IS_RUNNGING = true;
@@ -128,17 +145,23 @@ const addSteps = (tour, steps) => {
   }
 }
 
-
+/**
+ * Runs a tour with given oprions and steps
+ * @param {JSON} options options of tour
+ * @param {JSON} steps setps of tour
+ */
 const runMainTour = async (options, steps) => {
   tour = createTour(options);
+  addSteps(tour, steps);
+
   tour.on('complete', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     TOUR_IS_RUNNGING = false;
   });
+
   tour.on('cancel', () => {
     TOUR_IS_RUNNGING = false;
   });
-  addSteps(tour, steps);
 
   TOUR_IS_RUNNGING = true;
   tour.start();
@@ -182,6 +205,10 @@ const resolveService = async (response) => {
   }
 }
 
+/**
+ * processes requets from popup.js
+ * @param {JSON} requset request from popup.js
+ */
 const resolvePopup = async (request) => {
   switch(request.query) {
     case "showTooltips":

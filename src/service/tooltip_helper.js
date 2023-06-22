@@ -19,25 +19,23 @@ export const isTooltipsExist = async (on, url) => {
  * @returns boolean
  */
 export const isTooltipsEnabled = async (on, url) => {
-  if (on === "site") {
-    const cookie = await getCookie(url, "tooltips_site");
+  switch(on) {
+    case "site":
+      var cookie = await getCookie(url, "tooltips_site");
+      if (!cookie) {
+        setCookie(url, "tooltips_site", "1");
+        return true;
+      }
+      return cookie.value === "1" ? true : false;
 
-    if (!cookie) {
-      setCookie(url, "tooltips_site", "1");
-      return true;
-    }
-
-    return cookie.value === "1" ? true : false;
+    case "url":
+      var cookie = await getCookie(url, `tooltips_${url}`);
+      if (!cookie) {
+        setCookie(url, `tooltips_${url}`, "1");
+        return true;
+      }
+      return cookie.value === "1" ? true : false;
   }
-
-  const cookie = await getCookie(url, `tooltips_${url}`);
-
-  if (!cookie) {
-    setCookie(url, `tooltips_${url}`, "1");
-    return true;
-  }
-
-  return cookie.value === "1" ? true : false;
 }
 
 /**
@@ -47,10 +45,14 @@ export const isTooltipsEnabled = async (on, url) => {
  */
 export const getTooltipSets = async (url, roles) => {
   const data = await getTooltipSetsDB(url, roles);
-
   return data;
 }
 
+/**
+ * Adds a set of tooltips to the database
+ * @param {JSON} parameters origin, url, role, options, steps
+ * @returns True if the operation was successful, false otherwise
+ */
 export const addTooltipSet = async (parameters) => {
   const answer = await insertTooltipSetDB(
     parameters.origin,
