@@ -85,35 +85,20 @@ const resolvePopup = async (request) => {
       logoutUser();
       break;
 
-    case "isTooltips?site":
-      var answer = await isTooltipsExist("site", request.parameters.url);
-      sendMessageToPopup({
-        respondTo: request.query,
-        answer: answer
-      });
-      break;
+    case "getTooltipsInfo":
+      const isTooltipsSite = await isTooltipsExist("site", request.parameters.origin);
+      const isTooltipsUrl = await isTooltipsExist("url", request.parameters.url);
+      const isTooltipsEnabledSite = await isTooltipsEnabled("site", request.parameters.origin);
+      const isTooltipsEnabledUrl = await isTooltipsEnabled("url", request.parameters.url);
 
-    case "isTooltips?url":
-      var answer = await isTooltipsExist("url", request.parameters.url);
       sendMessageToPopup({
         respondTo: request.query,
-        answer: answer
-      });
-      break;
-
-    case "isTooltipsEnabled?site":
-      var answer = await isTooltipsEnabled("site", request.parameters.url);
-      sendMessageToPopup({
-        respondTo: request.query,
-        answer: answer
-      });
-      break;
-
-    case "isTooltipsEnabled?url":
-      var answer = await isTooltipsEnabled("url", request.parameters.url);
-      sendMessageToPopup({
-        respondTo: request.query,
-        answer: answer
+        answer: {
+          isTooltipsSite: isTooltipsSite,
+          isTooltipsUrl: isTooltipsUrl,
+          isTooltipsEnabledSite: isTooltipsEnabledSite,
+          isTooltipsEnabledUrl: isTooltipsEnabledUrl
+        }
       });
       break;
 

@@ -15,9 +15,6 @@ const firstLine = async (status) => {
 
     statusElem.appendChild(statusTitle);
     control.appendChild(statusElem);
-
-    const origin = await getOrigin();
-    if (status) queryToService("isTooltipsEnabled?site", {url: origin});
 }
 
 /**
@@ -46,8 +43,6 @@ const firstLineCheckbox = async (status) => {
 
         location.reload();
     });
-
-    if (status) queryToService("isTooltips?url", {url: url});
 }
 
 /**
@@ -67,9 +62,6 @@ const secondLine = async (status) => {
 
     statusElem.appendChild(statusTitle);
     control.appendChild(statusElem);
-
-    const url = await getCurrentTabUrl();
-    if (status) queryToService("isTooltipsEnabled?url", {url: url});
 }
 
 /**
@@ -87,6 +79,7 @@ const secondLineCheckbox = async (status) => {
     statusElem.appendChild(checkbox);
 
     const showTooltipsBtn = getShowTooltipsButton();
+    if (status) showTooltipsBtn.hidden = false;
 
     checkbox.addEventListener('change', async (event) => {
         const status = event.target.checked;
@@ -98,8 +91,6 @@ const secondLineCheckbox = async (status) => {
             value: status ? "1" : "0"
         });
     });
-
-    if (status) showTooltipsBtn.hidden = false;
 }
 
 /**
@@ -124,4 +115,16 @@ const getShowTooltipsButton = () => {
     control.appendChild(showTooltipsBtn);
 
     return showTooltipsBtn;
+}
+
+const tooltipsInfoInterface = (parameters) => {    
+    firstLine(parameters.isTooltipsSite);
+
+    if (parameters.isTooltipsSite) {
+        firstLineCheckbox(parameters.isTooltipsEnabledSite);
+        if (parameters.isTooltipsEnabledSite) {
+            secondLine(parameters.isTooltipsUrl);
+            if (parameters.isTooltipsUrl) secondLineCheckbox(parameters.isTooltipsEnabledUrl);
+        }
+    }
 }

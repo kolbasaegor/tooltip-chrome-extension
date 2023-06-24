@@ -35,6 +35,7 @@ html, body {
 }
 
 .content {
+  position: relative;
   margin: 0;
   padding: 5px;
   flex-grow: 1;
@@ -116,5 +117,14 @@ a:hover {
 
 .submit-button {
   cursor: pointer;
+}
+
+.loading-gif {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  height: 30px;
 }
 

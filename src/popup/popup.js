@@ -36,20 +36,12 @@ const resolveService = async (response) => {
         footer_not_logged();
         break;
 
-    case "isTooltips?site":
-        firstLine(response.msg.answer);
-        break;
+    case "getTooltipsInfo":
+        if (TOOLTIPS_INFO_RECEIVED) break;
 
-    case "isTooltipsEnabled?site":
-        firstLineCheckbox(response.msg.answer);
-        break;
-
-    case "isTooltips?url":
-        secondLine(response.msg.answer);
-        break;
-
-    case "isTooltipsEnabled?url":
-        secondLineCheckbox(response.msg.answer);
+        TOOLTIPS_INFO_RECEIVED = true;
+        hideLoadingGif();
+        tooltipsInfoInterface(response.msg.answer);
         break;
   }
 }
@@ -76,7 +68,13 @@ chrome.runtime.onMessage.addListener(async (request) => {
  */
 const main = async () => {
     const origin = await getOrigin();
-    queryToService("isTooltips?site", {url: origin});
+    const url = await getCurrentTabUrl();
+    TOOLTIPS_INFO_RECEIVED = false;
+    
+    createLoadingGif();
+    showLoadingGif();
+
+    queryToService("getTooltipsInfo", { origin: origin, url: url });
     queryToService("getUser");
 
     createLoginForm();

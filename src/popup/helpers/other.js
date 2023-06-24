@@ -74,3 +74,21 @@ const openCreateTooltipsPage = async () => {
     openNewPage(parameters);
     return true;
 }
+
+const createLoadingGif = () => {
+    const loadingGif = document.createElement("img");
+    loadingGif.src = "../../icons/loading.gif";
+    loadingGif.alt = "";
+    loadingGif.className = "loading-gif";
+    loadingGif.hidden = true;
+
+    content.appendChild(loadingGif);
+}
+
+const showLoadingGif = () => {
+    document.querySelector(".loading-gif").hidden = false;
+}
+
+const hideLoadingGif = () => {
+    document.querySelector(".loading-gif").hidden = true;
+}
