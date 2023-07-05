@@ -1,5 +1,5 @@
 const submitToDb = async (origin, url) => {
-    const { status, role, options, steps } = validate();
+    const { status, name, role, options, steps } = validate();
 
     if (!status) return false;
 
@@ -7,6 +7,7 @@ const submitToDb = async (origin, url) => {
     queryToService("addTooltipSet", {
         origin: origin,
         url: url,
+        name: name,
         role: role.id,
         options: options.options,
         steps: { arr: steps.arr }
@@ -17,15 +18,27 @@ const validate = () => {
     const role = grabRole();
     const options = grabOptions();
     const steps = grabSteps();
+    const name = grabName();
 
     if (!(role.status & options.status & steps.status)) return { status: false };
 
     return {
         status: true,
+        name: name,
         role: role,
         options: options,
         steps: steps
     };
+}
+
+const grabName = () => {
+    const name = document.querySelector("#name-input");
+
+    console.log(name.value);
+
+    if (name.value == "") return "untitled";
+
+    return name.value;
 }
 
 const grabSteps = () => {

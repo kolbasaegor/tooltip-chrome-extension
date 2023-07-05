@@ -4,6 +4,10 @@
  */
 const resolveService = async (response) => {
   switch(response.msg.respondTo) {
+    case "getTooltipSetsMeta":
+        displayTooltipsMeta(response.msg.answer);
+        break;
+
     case "registerUser":
         if (response.msg.answer.status) {
             hideRegisterForm();
@@ -17,7 +21,7 @@ const resolveService = async (response) => {
 
     case "loginUser":
         if (response.msg.answer) {
-            showInfo("suc", "You have successfully logged in! Refresh page");
+            location.reload();
         } else {
             showLoginForm();
             showInfo("err", "Incorrect login or password");
@@ -32,7 +36,7 @@ const resolveService = async (response) => {
         );
 
         response.msg.answer.isLoggedIn ?
-        footer_logged() :
+        footer_logged(pullRoles(response.msg.answer.roles)) :
         footer_not_logged();
         break;
 

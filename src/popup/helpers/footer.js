@@ -28,7 +28,7 @@ const footer_not_logged = () => {
 /**
  * Creates footer for authorized user
  */
-const footer_logged = async () => {
+const footer_logged = async (roles) => {
     const footer = document.querySelector(".footer");
 
     const logoutButton = document.createElement("a");
@@ -42,7 +42,7 @@ const footer_logged = async () => {
 
     const url = await getCurrentTabUrl();
     if (url.startsWith("https://") || url.startsWith("http://")) {
-        addCreateTooltipsBtn(footer);
+        if (roles.includes("admin")) addCreateTooltipsBtn(footer);
     }
 }
 
@@ -50,13 +50,14 @@ const footer_logged = async () => {
  * Creates button which opens the CreateTooltipsPage
  * @param {HTMLElement} footer 
  */
-const addCreateTooltipsBtn = (footer) => {
-    const createTooltipSetButton = document.createElement("a");
-    createTooltipSetButton.href = "#";
-    createTooltipSetButton.textContent = "[create tooltip set]";
-    createTooltipSetButton.onclick = async () => {
-        const status = await openCreateTooltipsPage();
-        if (!status) showInfo("err", "Страница для создания подсказок уже открыта!");
+const addCreateTooltipsBtn = async (footer) => {
+    const adminMenu = await createAdminMenu();
+
+    const openAdminMenuButton = document.createElement("a");
+    openAdminMenuButton.href = "#";
+    openAdminMenuButton.textContent = "[admin menu]";
+    openAdminMenuButton.onclick = async () => {
+        adminMenu.hidden = false;
     }
-    footer.appendChild(createTooltipSetButton);
+    footer.appendChild(openAdminMenuButton);
 }

@@ -27,7 +27,7 @@ const showInfo = (type, text) => {
  * @param {JSON} parameters url and origin of current page
  */
 const openNewPage = (parameters) => {
-    const newPageUrl = "../../create_tooltips_page/create_tooltips.html";
+    const newPageUrl = "../../additional_pages/create_tooltips.html";
 
     chrome.tabs.create({url: newPageUrl, active:false}, (tab) => { 
         setTimeout(()=>{
@@ -46,7 +46,7 @@ const isCreateTooltipsPageOpen = async () => {
     const tabs = await chrome.tabs.query({});
 
     for (var tab of tabs) {
-        if (tab.url.endsWith("create_tooltips_page/create_tooltips.html")) {
+        if (tab.url.endsWith("create_tooltips.html")) {
             return true;
         }
     }
@@ -91,4 +91,14 @@ const showLoadingGif = () => {
 
 const hideLoadingGif = () => {
     document.querySelector(".loading-gif").hidden = true;
+}
+
+const pullRoles = (rolesJSON) => {
+    let rolesArr = [];
+
+    for (let role of rolesJSON) {
+        rolesArr.push(role.role);
+    }
+
+    return rolesArr;
 }

@@ -30,6 +30,15 @@ export const getTooltipSetsDB = async (url, roles) => {
     return data;
 }
 
+export const getTooltipSetsMetaDB = async (url) => {
+    const { data, error } = await _supabase
+    .from('tooltip_set')
+    .select(`available_url!inner ( url ), role!inner ( role, color ), name, id`)
+    .eq('available_url.url', url)
+
+    return data;
+}
+
 
 export const getUserDB = async (login, password) => {
     const { data, error } = await _supabase
@@ -134,7 +143,7 @@ const getAvailableUrl = async (url, domainId) => {
     return availableUrl;
 }
 
-export const insertTooltipSetDB = async (origin, url, role, options, steps) => {
+export const insertTooltipSetDB = async (origin, url, name, role, options, steps) => {
     const availableDomain = await getAvailableDomain(origin);
     const availableUrl = await getAvailableUrl(url, availableDomain.data[0].id);
 
@@ -143,9 +152,17 @@ export const insertTooltipSetDB = async (origin, url, role, options, steps) => {
     .insert({
         url_id: availableUrl.data[0].id,
         role_id: role,
+        name: name,
         options: options,
         steps: steps
     });
 
     return error ? false : true;
+}
+
+export const removeTooltipSetDB = async (id) => {
+    const { error } = await _supabase
+    .from('tooltip_set')
+    .delete()
+    .eq('id', id);
 }

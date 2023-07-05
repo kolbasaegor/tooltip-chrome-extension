@@ -28,6 +28,7 @@ html, body {
   margin: 5px;
   margin-left: 0;
   display: inline-block;
+  font-weight: 500;
 }
 
 .role-container {
@@ -49,6 +50,21 @@ html, body {
 .container {
   display: flex;
   justify-content: space-between;
+}
+
+.scrollable-container .container {
+  padding: 15px;
+  font-size: 16px;
+}
+
+.scrollable-container .role {
+  font-weight: 400;
+  margin: 0;
+  font-size: 13px;
+}
+
+.scrollable-container .container:hover {
+  background-color: #f3f3f3;
 }
 
 .entry {
@@ -128,3 +144,54 @@ a:hover {
   height: 30px;
 }
 
+.admin-menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85%;
+  height: 85%;
+  background-color: #fff;
+  box-shadow: 0 0 30px 5px gray;
+  border-radius: 15px;
+  padding: 10px;
+  z-index: 100;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 101;
+  cursor: pointer;
+}
+
+.scrollable-container {
+  margin-top: 10px;
+  height: 170px; 
+  overflow-y: auto; 
+}
+
+.wide-button {
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  height: 30px;
+}
+
+.set-name {
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-and-change-buttons-container {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.remove-and-change-buttons {
+  display: inline-block;
+  margin-left: 10px;
+  cursor: pointer;
+}

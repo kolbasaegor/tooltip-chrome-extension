@@ -1,4 +1,9 @@
-import { isTooltipsDomainDB, isTooltipsUrlDB, getTooltipSetsDB, insertTooltipSetDB } from "../db/db.js";
+import { isTooltipsDomainDB,
+        isTooltipsUrlDB,
+        getTooltipSetsDB,
+        insertTooltipSetDB,
+        getTooltipSetsMetaDB,
+        removeTooltipSetDB } from "../db/db.js";
 import { getCookie, setCookie } from "./cookie.js";
 
 /**
@@ -10,6 +15,15 @@ import { getCookie, setCookie } from "./cookie.js";
 export const isTooltipsExist = async (on, url) => {
   if (on === "site") return isTooltipsDomainDB(url);
   if (on === "url") return isTooltipsUrlDB(url);
+}
+
+export const getTooltipSetsMeta = async (url) => {
+  const answer = await getTooltipSetsMetaDB(url);
+  return answer;
+}
+
+export const removeTooltipSet = async (id) => {
+  removeTooltipSetDB(id);
 }
 
 /**
@@ -57,6 +71,7 @@ export const addTooltipSet = async (parameters) => {
   const answer = await insertTooltipSetDB(
     parameters.origin,
     parameters.url,
+    parameters.name,
     parameters.role,
     parameters.options,
     parameters.steps

@@ -93,6 +93,16 @@ const createOptionsSelector = () => {
     options.appendChild(p);
 }
 
+const createNameInput = () => {
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "name-input";
+    nameInput.placeholder = "untitled";
+    nameInput.className = "long-input";
+
+    document.querySelector('#tour-name').appendChild(nameInput);
+}
+
 const warning = (text) => {
     const warning = document.createElement("div");
     warning.className = "overlay";
@@ -254,6 +264,7 @@ const tooltipConstructor = (roles) => {
 
     submitButton();
     createLoadingGif();
+    createNameInput();
     createRoleSelector(roles);
     createOptionsSelector();
     stepsConstructor();

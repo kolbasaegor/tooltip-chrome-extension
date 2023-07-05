@@ -1,4 +1,9 @@
-import { isTooltipsEnabled, isTooltipsExist, getTooltipSets, addTooltipSet } from "./service/tooltip_helper.js";
+import { isTooltipsEnabled,
+        isTooltipsExist,
+        getTooltipSets,
+        addTooltipSet,
+        getTooltipSetsMeta,
+        removeTooltipSet } from "./service/tooltip_helper.js";
 import { sendMessageToContentScript, sendMessageToPopup, sendMessageToCT } from "./service/messaging.js";
 import { loginUser, logoutUser, registerUser, getUser } from "./service/auth.js";
 import { setCookie } from "./service/cookie.js";
@@ -57,6 +62,18 @@ const resolveContentScript = async (request, sender) => {
  */
 const resolvePopup = async (request) => {
   switch(request.query) {
+    case "removeTooltipSet":
+      removeTooltipSet(request.parameters.id);
+      break;
+
+    case "getTooltipSetsMeta":
+      var answer = await getTooltipSetsMeta(request.parameters.url);
+      sendMessageToPopup({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
     case "registerUser":
       var answer = await registerUser(request.parameters.login, request.parameters.password);
       sendMessageToPopup({
