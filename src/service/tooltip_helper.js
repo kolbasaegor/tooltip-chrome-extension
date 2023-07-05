@@ -3,7 +3,9 @@ import { isTooltipsDomainDB,
         getTooltipSetsDB,
         insertTooltipSetDB,
         getTooltipSetsMetaDB,
-        removeTooltipSetDB } from "../db/db.js";
+        removeTooltipSetDB,
+        getTooltipSetByIdDB,
+        updateTooltipSetDB } from "../db/db.js";
 import { getCookie, setCookie } from "./cookie.js";
 
 /**
@@ -22,8 +24,18 @@ export const getTooltipSetsMeta = async (url) => {
   return answer;
 }
 
-export const removeTooltipSet = async (id) => {
+export const removeTooltipSet = (id) => {
   removeTooltipSetDB(id);
+}
+
+export const getTooltipSetById = async (id) => {
+  const answer = await getTooltipSetByIdDB(id);
+  return answer;
+}
+
+export const updateTooltipSet = async (id, newSet) => {
+  const answer = await updateTooltipSetDB(id, newSet);
+  return answer;
 }
 
 /**

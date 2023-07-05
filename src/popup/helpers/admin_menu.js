@@ -60,6 +60,9 @@ const addLine = (set, container) => {
     let changeButton = document.createElement("div");
     changeButton.textContent = "✏️";
     changeButton.className = "remove-and-change-buttons";
+    changeButton.onclick = () => {
+        openEditTooltipSetPage(set.id);
+    }
 
     let removeAndChangeButtons = document.createElement("div");
     removeAndChangeButtons.className = "remove-and-change-buttons-container";

@@ -34,3 +34,11 @@ export const sendMessageToCT = (message) => {
     msg: message
   });
 }
+
+export const sendMessageToET = (message) => {
+  chrome.runtime.sendMessage({
+    dest: "edit_tooltips",
+    from: "service",
+    msg: message
+  });
+}

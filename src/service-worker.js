@@ -3,8 +3,10 @@ import { isTooltipsEnabled,
         getTooltipSets,
         addTooltipSet,
         getTooltipSetsMeta,
-        removeTooltipSet } from "./service/tooltip_helper.js";
-import { sendMessageToContentScript, sendMessageToPopup, sendMessageToCT } from "./service/messaging.js";
+        removeTooltipSet,
+        getTooltipSetById,
+        updateTooltipSet } from "./service/tooltip_helper.js";
+import { sendMessageToContentScript, sendMessageToPopup, sendMessageToCT, sendMessageToET } from "./service/messaging.js";
 import { loginUser, logoutUser, registerUser, getUser } from "./service/auth.js";
 import { setCookie } from "./service/cookie.js";
 import { pullRoles, getAvailableRoles } from "./service/other.js";
@@ -149,6 +151,28 @@ const resolveCT = async (request) => {
   }
 }
 
+const resolveET = async (request) => {
+  switch(request.query) {
+    case "getTooltipSetById":
+      var answer = await getTooltipSetById(request.parameters.id);
+      sendMessageToET({
+        respondTo: request.query,
+        answer: answer
+      });
+      break;
+
+    case "updateTooltipSet":
+      var answer = await updateTooltipSet(request.parameters.id, request.parameters.newSet);
+      console.log(answer);
+      sendMessageToET({
+        respondTo: request.query,
+        answer: answer
+      })
+      break;
+    
+  }
+}
+
 /**
  * processes responses from other components
  * @param {JSON} request request from other components
@@ -160,6 +184,7 @@ const resolve = (request, sender) => {
   if (request.from === "content-script") resolveContentScript(request, sender);
   if (request.from === "popup") resolvePopup(request);
   if (request.from === "create_tooltips") resolveCT(request);
+  if (request.from === "edit_tooltips") resolveET(request);
 }
 
 /**

@@ -26,9 +26,7 @@ const showInfo = (type, text) => {
  * Opens new page
  * @param {JSON} parameters url and origin of current page
  */
-const openNewPage = (parameters) => {
-    const newPageUrl = "../../additional_pages/create_tooltips.html";
-
+const openNewPage = (newPageUrl, parameters) => {
     chrome.tabs.create({url: newPageUrl, active:false}, (tab) => { 
         setTimeout(()=>{
           chrome.tabs.sendMessage(tab.id, parameters, () => {
@@ -71,8 +69,22 @@ const openCreateTooltipsPage = async () => {
         url: url
     }
 
-    openNewPage(parameters);
+    openNewPage("../../additional_pages/create_tooltips.html", parameters);
     return true;
+}
+
+const openEditTooltipSetPage = async (setId) => {
+    const origin = await getOrigin();
+    const url = await getCurrentTabUrl();
+    const parameters = {
+        dest: "edit_tooltips",
+        from: "popup",
+        origin: origin,
+        url: url,
+        setId: setId
+    }
+
+    openNewPage("../../additional_pages/edit_tooltips.html", parameters);
 }
 
 const createLoadingGif = () => {

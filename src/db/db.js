@@ -30,6 +30,16 @@ export const getTooltipSetsDB = async (url, roles) => {
     return data;
 }
 
+export const getTooltipSetByIdDB = async (id) => {
+    const { data } = await _supabase
+    .from('tooltip_set')
+    .select(`id, options, steps, name, role!inner ( id, role, color )`)
+    .eq('id', id)
+    .limit(1);
+
+    return data[0];
+}
+
 export const getTooltipSetsMetaDB = async (url) => {
     const { data, error } = await _supabase
     .from('tooltip_set')
@@ -165,4 +175,13 @@ export const removeTooltipSetDB = async (id) => {
     .from('tooltip_set')
     .delete()
     .eq('id', id);
+}
+
+export const updateTooltipSetDB = async (id, newSet) => {
+    const { error } = await _supabase
+    .from('tooltip_set')
+    .update(newSet)
+    .eq('id', id);
+
+    return error ? false : true;
 }
