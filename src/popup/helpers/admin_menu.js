@@ -53,8 +53,7 @@ const addLine = (set, container) => {
     removeButton.textContent = "❌";
     removeButton.className = "remove-and-change-buttons";
     removeButton.onclick = () => {
-        line.remove();
-        queryToService("removeTooltipSet", { id: set.id });
+        removeTooltipSetConfirmationWindow(set.id, line);
     }
 
     let changeButton = document.createElement("div");
@@ -89,4 +88,35 @@ const displayTooltipsMeta = (data) => {
     }
 
     console.log(data);
+}
+
+const removeTooltipSetConfirmationWindow = (id, line) => {
+    const window = document.createElement("div");
+    window.className = "confirmation-window";
+
+    const question = document.createElement("p");
+    question.textContent = "Вы точно хотите удалить этот набор?";
+
+    const yes = document.createElement("div");
+    yes.textContent = "Да";
+    yes.className = "fake-button";
+    yes.onclick = () => {
+        queryToService("removeTooltipSet", { id: id });
+        line.remove()
+        window.remove()
+    }
+
+    const no = document.createElement("div");
+    no.textContent = "Нет";
+    no.className = "fake-button";
+    no.onclick = () => {
+        window.remove();
+    }
+
+    window.appendChild(question);
+    window.appendChild(no);
+    window.appendChild(yes);
+
+    const adminMenu = document.querySelector(".admin-menu");
+    adminMenu.appendChild(window);
 }

@@ -158,6 +158,20 @@ a:hover {
   z-index: 100;
 }
 
+.confirmation-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85%;
+  background-color: #ff0000;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 15px;
+  padding: 10px;
+  z-index: 200;
+}
+
 .close-button {
   position: absolute;
   top: 10px;
@@ -194,4 +208,13 @@ a:hover {
   display: inline-block;
   margin-left: 10px;
   cursor: pointer;
+}
+
+.fake-button {
+  padding-top: 10px;
+  cursor: pointer;
+}
+
+.fake-button:hover {
+  text-decoration: underline;
 }
